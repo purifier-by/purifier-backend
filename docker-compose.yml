@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: nestjs
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    # command: npm run start
+    depends_on:
+      - postgres
+    ports:
+      - ${PORT}:${PORT}
+    networks:
+      - nesjs-network
+    volumes:
+      - ./:/usr/local/app
+      - ignore:/usr/local/app/node_modules
+    restart: always
+    env_file:
+      - .env
+    environment:
+      PORT: ${PORT}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+  postgres:
+    image: postgres:latest
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - nesjs-network
+    volumes:
+      - postgres_data:/var/lib/postgres
+      # - ./dbscripts/postgres:/docker-entrypoint-initdb.d
+
+networks:
+  nesjs-network:
+
+
+volumes:
+  postgres_data:
+  app_data:
+  ignore:
