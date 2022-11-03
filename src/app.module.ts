@@ -8,6 +8,7 @@ import * as Joi from 'joi';
 import { MulterModule } from '@nestjs/platform-express';
 import DatabaseModule from './database/database.module';
 import { ProductsModule } from './modules/products/products.module';
+import { UsersModule } from './modules/users/users.module';
 
 
 @Module({
@@ -17,6 +18,7 @@ import { ProductsModule } from './modules/products/products.module';
       dest: './public',
     }),
     ProductsModule,
+    UsersModule,
     DatabaseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
 
 class ProductDto {
     @IsString()
@@ -17,7 +17,7 @@ class ProductDto {
     @IsNotEmpty()
     points: string;
 
-    @IsString()
+    @IsNumber()
     @IsNotEmpty()
     price: number;
 }
