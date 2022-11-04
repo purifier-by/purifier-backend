@@ -21,6 +21,23 @@ class UsersRepository {
         }
         return new UserModel(entity);
     }
+
+
+    async getById(id: number) {
+        const databaseResponse = await this.databaseService.runQuery(
+            `
+        SELECT *
+          FROM users
+          WHERE users.id=$1
+      `,
+            [id],
+        );
+        const entity = databaseResponse.rows[0];
+        if (!entity) {
+            throw new NotFoundException();
+        }
+        return new UserModel(entity);
+    }
 }
 
 export default UsersRepository;

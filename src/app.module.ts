@@ -9,16 +9,17 @@ import { MulterModule } from '@nestjs/platform-express';
 import DatabaseModule from './database/database.module';
 import { ProductsModule } from './modules/products/products.module';
 import { UsersModule } from './modules/users/users.module';
+import { AuthenticationModule } from './modules/authentication/authentication.module';
 
 
 @Module({
   imports: [
-    // AuthModule,
     MulterModule.register({
       dest: './public',
     }),
     ProductsModule,
     UsersModule,
+    AuthenticationModule,
     DatabaseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

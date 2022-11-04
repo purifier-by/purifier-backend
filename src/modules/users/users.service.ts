@@ -8,6 +8,10 @@ class UsersService {
     async getByLogin(login: string) {
         return this.usersRepository.getByLogin(login);
     }
+
+    async getById(id: number) {
+        return this.usersRepository.getById(id);
+    }
 }
 
 export default UsersService;
