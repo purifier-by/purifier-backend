@@ -1,4 +1,3 @@
-// import { AuthModule } from './auth/auth.module';
 import { join } from 'path';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -10,15 +9,23 @@ import DatabaseModule from './database/database.module';
 import { ProductsModule } from './modules/products/products.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthenticationModule } from './modules/authentication/authentication.module';
+import { FilesModule } from './modules/files/files.module';
 
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '../..', 'public'),
+      serveStaticOptions: {
+        index: false,
+      },
+    }),
     MulterModule.register({
       dest: './public',
     }),
     ProductsModule,
     UsersModule,
+    FilesModule,
     AuthenticationModule,
     DatabaseModule.forRootAsync({
       imports: [ConfigModule],
@@ -40,9 +47,6 @@ import { AuthenticationModule } from './modules/authentication/authentication.mo
         POSTGRES_PASSWORD: Joi.string().required(),
         POSTGRES_DB: Joi.string().required(),
       }),
-    }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
     }),
   ],
   controllers: [],
