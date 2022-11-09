@@ -42,6 +42,6 @@ export class FilesController {
     })
     uploadFile(@UploadedFile() file: Express.Multer.File) {
         const domain = this.configService.get('DOMAIN')
-        return { url: `${domain}/${file.filename}` }
+        return { url: `${domain}/${file.filename}`, key: file.filename }
     }
 }

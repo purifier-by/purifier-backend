@@ -1,12 +1,14 @@
 
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import DatabaseService from '../../database/database.service';
 import ProductDto from './product.dto';
 import ProductModel from './product.model';
+import ProductWithDetails from './productWithDetails.model';
 
 @Injectable()
 class ProductsRepository {
-    constructor(private readonly databaseService: DatabaseService) { }
+    constructor(private readonly databaseService: DatabaseService, private readonly configService: ConfigService,) { }
 
     async getAll() {
         const databaseResponse = await this.databaseService.runQuery(`
@@ -29,15 +31,31 @@ class ProductsRepository {
             [productId],
         );
         const productEntity = productResponse.rows[0];
+
         if (!productEntity) {
             throw new NotFoundException();
         }
 
-        return new ProductModel(productEntity);
+        const domain = this.configService.get('DOMAIN')
+
+        const imagesUrlResponse = await this.databaseService.runQuery(
+            `
+            SELECT ARRAY(
+                SELECT CONCAT('${domain}/', url) AS "url"
+                FROM product_images
+                WHERE
+                    product_id = $1
+                ORDER BY position
+            ) AS images
+          `,
+            [productId],
+        );
+
+        return new ProductWithDetails({ ...productEntity, images: imagesUrlResponse.rows[0].images });
     }
 
     async create(productData: ProductDto) {
-        const databaseResponse = await this.databaseService.runQuery(
+        const productResponse = await this.databaseService.runQuery(
             `
           INSERT INTO products (
             title,
@@ -55,7 +73,18 @@ class ProductsRepository {
         `,
             [productData.title, productData.description, productData.characteristics, productData.points, productData.price],
         );
-        return new ProductModel(databaseResponse.rows[0]);
+
+        const productEntity = productResponse.rows[0];
+
+        if (productData.images) {
+            let position = 1
+            for (const image of productData.images) {
+                await this.databaseService.runQuery(`INSERT INTO product_images (url, position, product_id) VALUES ($1, $2, $3) RETURNING *`, [image, position, productEntity.id]);
+                position++
+            }
+        }
+
+        return new ProductModel(productEntity);
     }
 
     async update(id: number, productData: ProductDto) {

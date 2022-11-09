@@ -1,5 +1,6 @@
-import { Body, ClassSerializerInterceptor, Controller, Delete, Get, Param, Post, Put, UseInterceptors } from "@nestjs/common";
+import { Body, ClassSerializerInterceptor, Controller, Delete, Get, Param, Post, Put, UseGuards, UseInterceptors } from "@nestjs/common";
 import FindOneParams from "src/utils/findOneParams";
+import JwtAuthenticationGuard from "../authentication/jwt-authentication.guard";
 import ProductDto from "./product.dto";
 import { ProductsService } from "./products.service";
 
@@ -9,25 +10,24 @@ import { ProductsService } from "./products.service";
 export default class ProductsController {
     constructor(private readonly productsService: ProductsService) { }
 
-
     @Get(':id')
-    getPostById(@Param() { id }: FindOneParams) {
+    getProductById(@Param() { id }: FindOneParams) {
         return this.productsService.getProductById(id);
     }
 
     @Put(':id')
-    updatePost(@Param() { id }: FindOneParams, @Body() productData: ProductDto) {
-        return this.productsService.updatePost(id, productData);
+    updateProduct(@Param() { id }: FindOneParams, @Body() productData: ProductDto) {
+        return this.productsService.updateProduct(id, productData);
     }
 
     @Post()
-    // @UseGuards(JwtAuthenticationGuard)
-    createPost(@Body() productData: ProductDto) {
-        return this.productsService.createPost(productData);
+    @UseGuards(JwtAuthenticationGuard)
+    createProduct(@Body() productData: ProductDto) {
+        return this.productsService.createProduct(productData);
     }
 
     @Delete(':id')
-    deletePost(@Param() { id }: FindOneParams) {
-        return this.productsService.deletePost(id);
+    deleteProduct(@Param() { id }: FindOneParams) {
+        return this.productsService.deleteProduct(id);
     }
 }

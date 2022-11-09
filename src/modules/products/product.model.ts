@@ -14,6 +14,7 @@ class ProductModel {
     characteristics: string;
     points: string;
     price: number;
+
     constructor(productData: ProductModelData) {
         this.id = productData.id;
         this.title = productData.title;
