@@ -1,3 +1,5 @@
+import { Exclude } from 'class-transformer';
+
 export interface ProductModelData {
     id: number;
     title: string;
@@ -5,6 +7,7 @@ export interface ProductModelData {
     characteristics: string;
     points: string;
     price: number;
+    brand_id: number | null;
 }
 
 class ProductModel {
@@ -15,6 +18,9 @@ class ProductModel {
     points: string;
     price: number;
 
+    @Exclude()
+    brand_id: number | null;
+
     constructor(productData: ProductModelData) {
         this.id = productData.id;
         this.title = productData.title;
@@ -22,6 +28,7 @@ class ProductModel {
         this.description = productData.description;
         this.points = productData.points;
         this.price = productData.price;
+        this.brand_id = productData.brand_id;
     }
 }
 

@@ -26,9 +26,24 @@ class ProductsRepository {
         const productResponse = await client.query(
             `
           SELECT
-           *
+          *,
+          (
+            SELECT
+                json_build_object(
+                    'id',
+                    brand.id,
+                    'title',
+                    brand.title
+                )
+            FROM (
+                    SELECT *
+                    FROM brands
+                    WHERE
+                        brands.id = products.brand_id
+                ) brand
+        ) AS "brand"
           FROM products
-          WHERE products.id=$1
+          WHERE id=$1
           `,
             [productId],
         );
@@ -47,6 +62,9 @@ class ProductsRepository {
         const client = await this.databaseService.getPoolClient();
         try {
             await client.query('BEGIN;');
+
+            // ToDo: Do validation if brand_id does no exist
+
             const productResponse = await client.query(
                 `
               INSERT INTO products (
@@ -54,25 +72,26 @@ class ProductsRepository {
                 description,
                 characteristics,
                 points,
-                price
+                price,
+                brand_id
               ) VALUES (
                 $1,
                 $2,
                 $3,
                 $4,
-                $5
+                $5,
+                $6
               ) RETURNING *
             `,
-                [productData.title, productData.description, productData.characteristics, productData.points, productData.price],
+                [productData.title, productData.description, productData.characteristics, productData.points, productData.price, productData.brand_id],
             );
 
             const productEntity = productResponse.rows[0];
 
             await this.addImagesToProduct(client, productEntity.id, productData.images)
-            const images = await this.getImageUrlsRelatedToProduct(client, productEntity.id)
 
             await client.query(`COMMIT;`);
-            return new ProductWithDetails({ ...productEntity, images });
+            return this.getWithDetails(productEntity.id);
         } catch (error) {
             await client.query('ROLLBACK;');
             throw error;
@@ -149,23 +168,26 @@ class ProductsRepository {
         try {
             await client.query('BEGIN;');
 
+            // ToDo: Do validation if brand_id does no exist
+
             const productResponse = await client.query(
                 `
-            UPDATE posts
-            SET title = $2, description = $3, characteristics = $4, points = $5, price = $6
+            UPDATE products
+            SET title = $2, description = $3, characteristics = $4, points = $5, price = $6, brand_id = $7
             WHERE id = $1
             RETURNING *
         `,
-                [id, productData.title, productData.description, productData.characteristics, productData.points, productData.price],
+                [id, productData.title, productData.description, productData.characteristics, productData.points, productData.price, productData.brand_id],
             );
             const productEntity = productResponse.rows[0];
             if (!productEntity) {
                 throw new NotFoundException();
             }
 
-            const images = await this.updateImages(client, id, productData.images)
+            await this.updateImages(client, id, productData.images)
 
-            return new ProductWithDetails({ ...productEntity, images });
+            await client.query(`COMMIT;`);
+            return this.getWithDetails(productEntity.id);
         } catch (error) {
             await client.query('ROLLBACK;');
             throw error;

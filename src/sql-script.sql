@@ -226,12 +226,6 @@ VALUES (
         '3'
     );
 
--- Create Brands
-
-INSERT INTO brands (id, title) VALUES ('1', 'Ecomaster');
-
-INSERT INTO brands (id, title) VALUES ('2', 'Ruhens');
-
 -- Create WaterModes
 
 INSERT INTO water_modes (id, title) VALUES ('1', 'Комнатная t');

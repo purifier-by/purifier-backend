@@ -21,6 +21,10 @@ class ProductDto {
     @IsNotEmpty()
     price: number;
 
+    @IsNumber()
+    @IsNotEmpty()
+    brand_id: number;
+
     @IsOptional()
     images?: string[];
 }

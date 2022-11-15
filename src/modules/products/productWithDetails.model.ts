@@ -1,3 +1,4 @@
+import BrandModel from "../brands/brand.model";
 import ProductModel from "./product.model";
 
 export interface ProductWithDetailsData {
@@ -7,14 +8,18 @@ export interface ProductWithDetailsData {
     characteristics: string;
     points: string;
     price: number;
-    images: string[]
+    images: string[];
+    brand_id: number | null;
+    brand: BrandModel | null;
 }
 
 class ProductWithDetails extends ProductModel {
-    images: string[]
+    images: string[];
+    brand: BrandModel | null
     constructor(productData: ProductWithDetailsData) {
         super(productData);
         this.images = productData.images
+        this.brand = productData.brand
     }
 }
 
