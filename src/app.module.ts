@@ -12,6 +12,7 @@ import { AuthenticationModule } from './modules/authentication/authentication.mo
 import { FilesModule } from './modules/files/files.module';
 import { BrandsModule } from './modules/brands/brands.module';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { SubCategoriesModule } from './modules/subCategories/subCategories.module';
 
 
 @Module({
@@ -31,6 +32,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
     AuthenticationModule,
     BrandsModule,
     CategoriesModule,
+    SubCategoriesModule,
     DatabaseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

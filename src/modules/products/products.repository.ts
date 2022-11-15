@@ -63,7 +63,7 @@ class ProductsRepository {
         try {
             await client.query('BEGIN;');
 
-            // ToDo: Do validation if brandId does no exist
+            // TODO: Do validation if brandId does no exist
 
             const productResponse = await client.query(
                 `
@@ -168,7 +168,7 @@ class ProductsRepository {
         try {
             await client.query('BEGIN;');
 
-            // ToDo: Do validation if brandId does no exist
+            // TODO: Do validation if brandId does no exist
 
             const productResponse = await client.query(
                 `

@@ -10,7 +10,7 @@ export async function up(knex: Knex): Promise<void> {
     );
     `)
 
-  await knex.raw(`ALTER TABLE products ADD COLUMN categoryId int REFERENCES categories(id)`)
+  await knex.raw(`ALTER TABLE products ADD COLUMN "categoryId" int REFERENCES categories(id)`)
 }
 
 

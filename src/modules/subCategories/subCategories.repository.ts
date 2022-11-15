@@ -1,21 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import DatabaseService from '../../database/database.service';
-import CategoryDto from './category.dto';
-import CategoryModel from './category.model';
+import { SubCategoryDto } from './subCategory.dto';
+import { SubCategoryModel } from './subCategory.model';
 
 @Injectable()
-class CategoriesRepository {
+export class SubCategoriesRepository {
     constructor(private readonly databaseService: DatabaseService, private readonly configService: ConfigService,) { }
 
     async getAll() {
         const domain = this.configService.get('DOMAIN')
 
         const databaseResponse = await this.databaseService.runQuery(`
-        SELECT id, title, CONCAT('${domain}/', image) AS "image" FROM categories
-    `);
+            SELECT id, title, CONCAT('${domain}/', image) AS "image", "categoryId" FROM sub_categories
+        `);
+
         return databaseResponse.rows.map(
-            (databaseRow) => new CategoryModel(databaseRow),
+            (databaseRow) => new SubCategoryModel(databaseRow),
         );
     }
 
@@ -27,9 +28,10 @@ class CategoriesRepository {
           SELECT
           id, 
           title,
-          CONCAT('${domain}/', image) as "image"
-          FROM categories
-          WHERE categories.id=$1
+          CONCAT('${domain}/', image) as "image",
+          "categoryId",
+          FROM sub_categories
+          WHERE sub_categories.id=$1
           `,
             [id],
         );
@@ -39,24 +41,26 @@ class CategoriesRepository {
             throw new NotFoundException();
         }
 
-        return new CategoryModel({ ...categoryEntity });
+        return new SubCategoryModel({ ...categoryEntity });
     }
 
-    async create(categoryData: CategoryDto) {
+    async create(categoryData: SubCategoryDto) {
         const client = await this.databaseService.getPoolClient();
         try {
             await client.query('BEGIN;');
             const categoryResponse = await client.query(
                 `
-              INSERT INTO categories (
+              INSERT INTO sub_categories (
                 title,
-                image
+                image,
+                "categoryId"
               ) VALUES (
                 $1,
-                $2
+                $2,
+                $3
               ) RETURNING *
             `,
-                [categoryData.title, categoryData.image],
+                [categoryData.title, categoryData.image, categoryData.categoryId],
             );
 
             const categoryEntity = categoryResponse.rows[0];
@@ -71,7 +75,7 @@ class CategoriesRepository {
         }
     }
 
-    async update(id: number, categoryData: CategoryDto) {
+    async update(id: number, categoryData: SubCategoryDto) {
         const client = await this.databaseService.getPoolClient();
 
         try {
@@ -80,11 +84,11 @@ class CategoriesRepository {
             const categoryResponse = await client.query(
                 `
             UPDATE categories
-            SET title = $2, image = $3
+            SET title = $2, image = $3, categoryId = $4
             WHERE id = $1
             RETURNING *
         `,
-                [id, categoryData.title, categoryData.image],
+                [id, categoryData.title, categoryData.image, categoryData.categoryId],
             );
             const categoryEntity = categoryResponse.rows[0];
             if (!categoryEntity) {
@@ -104,9 +108,10 @@ class CategoriesRepository {
     async delete(id: number) {
         const client = await this.databaseService.getPoolClient();
 
-        await client.query(`UPDATE products set categoryId = NULL where categoryId = $1 RETURNING *`, [id])
+        await client.query(`UPDATE products set "categoryId" = NULL where "categoryId" = $1 RETURNING *`, [id])
 
-        // TODO: set Null subcategory and category for product
+        // TODO: set Null category for product
+
         const databaseResponse = await client.query(
             `DELETE FROM categories WHERE id=$1`,
             [id],
@@ -117,5 +122,3 @@ class CategoriesRepository {
         }
     }
 }
-
-export default CategoriesRepository;
