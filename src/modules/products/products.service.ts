@@ -8,6 +8,43 @@ export class ProductsService {
         private readonly productsRepository: ProductsRepository,
     ) { }
 
+    getProducts(
+        categoryId?: number,
+        offset?: number,
+        limit?: number,
+        idsToSkip?: number,
+        searchQuery?: string,
+    ) {
+
+        // if (categoryId && searchQuery) {
+        //     return this.postsSearchRepository.searchByAuthor(
+        //         authorId,
+        //         offset,
+        //         limit,
+        //         idsToSkip,
+        //         searchQuery,
+        //     );
+        // }
+
+        if (categoryId) {
+            return this.productsRepository.get(
+                categoryId,
+                offset,
+                limit,
+            );
+        }
+
+        // if (searchQuery) {
+        //     return this.postsSearchRepository.search(
+        //         offset,
+        //         limit,
+        //         idsToSkip,
+        //         searchQuery,
+        //     );
+        // }
+        return this.productsRepository.get(categoryId, offset, limit);
+    }
+
     getProductById(id: number) {
         return this.productsRepository.getWithDetails(id);
     }

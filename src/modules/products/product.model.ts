@@ -8,6 +8,8 @@ export interface ProductModelData {
     points: string;
     price: number;
     brandId: number | null;
+    categoryId: number | null;
+    subCategoryId: number | null;
 }
 
 class ProductModel {
@@ -21,6 +23,12 @@ class ProductModel {
     @Exclude()
     brandId: number | null;
 
+    @Exclude()
+    categoryId: number | null;
+
+    @Exclude()
+    subCategoryId: number | null;
+
     constructor(productData: ProductModelData) {
         this.id = productData.id;
         this.title = productData.title;
@@ -29,6 +37,8 @@ class ProductModel {
         this.points = productData.points;
         this.price = productData.price;
         this.brandId = productData.brandId;
+        this.categoryId = productData.categoryId;
+        this.subCategoryId = productData.subCategoryId;
     }
 }
 

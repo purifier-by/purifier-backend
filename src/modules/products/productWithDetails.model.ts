@@ -11,6 +11,8 @@ export interface ProductWithDetailsData {
     images: string[];
     brandId: number | null;
     brand: BrandModel | null;
+    categoryId: number | null;
+    subCategoryId: number | null;
 }
 
 class ProductWithDetails extends ProductModel {

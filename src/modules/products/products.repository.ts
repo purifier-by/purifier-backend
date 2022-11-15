@@ -11,15 +11,68 @@ import ProductWithDetails from './productWithDetails.model';
 class ProductsRepository {
     constructor(private readonly databaseService: DatabaseService, private readonly configService: ConfigService,) { }
 
-    async getAll() {
-        const databaseResponse = await this.databaseService.runQuery(`
-        SELECT * FROM products
-    `);
-        const items = databaseResponse.rows.map(
-            (databaseRow) => new ProductModel(databaseRow),
+    async get(categoryId: number | null, offset = 0, limit: number | null = null) {
+        // const next_value = next ? +next : 0;
+        const client = await this.databaseService.getPoolClient();
+
+        const databaseResponse = await this.databaseService.runQuery(
+            `
+          WITH selected_products AS (
+            SELECT 
+            *, 
+            (
+                SELECT
+                    json_build_object(
+                        'id',
+                        brand.id,
+                        'title',
+                        brand.title
+                    )
+                FROM (
+                        SELECT *
+                        FROM brands
+                        WHERE
+                            brands.id = products."brandId"
+                    ) brand
+            ) AS "brand"
+            FROM products
+            WHERE "categoryId" = $3
+            ORDER BY id ASC
+            OFFSET $1
+            LIMIT $2
+          ),
+          total_products_count_response AS (
+            SELECT COUNT(*)::int AS total_products_count FROM products
+          )
+          SELECT * FROM selected_products, total_products_count_response
+        `,
+            [offset, limit, categoryId],
         );
-        return { items }
+        const items = await Promise.all(databaseResponse.rows.map(
+            async (databaseRow) => {
+                const images = await this.getImageUrlsRelatedToProduct(client, databaseRow.id)
+                return new ProductWithDetails({ ...databaseRow, images });
+            },
+        ));
+        const count = databaseResponse.rows[0]?.total_posts_count || 0;
+        return {
+            items,
+            count,
+            next: 0 + limit,
+            canNext: true,
+        };
     }
+
+
+    // async getAll() {
+    //     const databaseResponse = await this.databaseService.runQuery(`
+    //     SELECT * FROM products
+    // `);
+    //     const items = databaseResponse.rows.map(
+    //         (databaseRow) => new ProductModel(databaseRow),
+    //     );
+    //     return { items }
+    // }
 
     async getWithDetails(productId: number) {
         const client = await this.databaseService.getPoolClient();
@@ -39,11 +92,11 @@ class ProductsRepository {
                     SELECT *
                     FROM brands
                     WHERE
-                        brands.id = products.brandId
+                        brands.id = products."brandId"
                 ) brand
         ) AS "brand"
           FROM products
-          WHERE id=$1
+          WHERE products.id=$1
           `,
             [productId],
         );
@@ -142,7 +195,7 @@ class ProductsRepository {
                 SELECT CONCAT('${domain}/', url) AS "url"
                 FROM product_images
                 WHERE
-                    productId = $1
+                    "productId" = $1
                 ORDER BY position
             ) AS images
           `,

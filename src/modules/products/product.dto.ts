@@ -25,6 +25,14 @@ class ProductDto {
     @IsNotEmpty()
     brandId: number;
 
+    @IsNumber()
+    @IsNotEmpty()
+    categoryId: number;
+
+    @IsNumber()
+    @IsNotEmpty()
+    subCategoryId: number;
+
     @IsOptional()
     images?: string[];
 }

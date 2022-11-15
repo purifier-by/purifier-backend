@@ -83,7 +83,7 @@ export class SubCategoriesRepository {
 
             const categoryResponse = await client.query(
                 `
-            UPDATE categories
+            UPDATE sub_categories
             SET title = $2, image = $3, categoryId = $4
             WHERE id = $1
             RETURNING *
@@ -113,7 +113,7 @@ export class SubCategoriesRepository {
         // TODO: set Null category for product
 
         const databaseResponse = await client.query(
-            `DELETE FROM categories WHERE id=$1`,
+            `DELETE FROM sub_categories WHERE id=$1`,
             [id],
         );
 

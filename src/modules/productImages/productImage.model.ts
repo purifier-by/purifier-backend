@@ -1,13 +1,13 @@
 export interface ProductImageModelData {
     id: number;
-    position: string;
+    position: number;
     url: string;
     productId: string;
 }
 
 class ProductImageModel {
     id: number;
-    position: string;
+    position: number;
     url: string;
     productId: string;
 
