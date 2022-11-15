@@ -16,12 +16,12 @@ export class BrandsService {
         return this.brandsRepository.getById(id);
     }
 
-    createBrand(productData: BrandDto) {
-        return this.brandsRepository.create(productData);
+    createBrand(brandData: BrandDto) {
+        return this.brandsRepository.create(brandData);
     }
 
-    updateBrand(id: number, productData: BrandDto) {
-        return this.brandsRepository.update(id, productData);
+    updateBrand(id: number, brandData: BrandDto) {
+        return this.brandsRepository.update(id, brandData);
     }
 
     deleteBrand(id: number) {

@@ -13,6 +13,10 @@ export async function up(knex: Knex): Promise<void> {
 
 
 export async function down(knex: Knex): Promise<void> {
+  await knex.raw(`
+  ALTER TABLE products
+    DROP COLUMN brandId;
+  `);
   return knex.raw(`DROP TABLE brands`);
 }
 
