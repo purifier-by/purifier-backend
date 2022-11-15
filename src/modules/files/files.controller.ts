@@ -19,11 +19,11 @@ export const storage = {
     })
 }
 
+@ApiTags('Files')
 @Controller('files')
 export class FilesController {
     constructor(private readonly filesService: FilesService, private readonly configService: ConfigService,) { }
 
-    @ApiTags('Admin')
     @ApiBearerAuth('defaultBearerAuth')
     @UseGuards(JwtAuthenticationGuard)
     @Post('/upload')

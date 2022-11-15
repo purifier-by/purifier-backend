@@ -9,7 +9,7 @@ export interface ProductWithDetailsData {
     points: string;
     price: number;
     images: string[];
-    brand_id: number | null;
+    brandId: number | null;
     brand: BrandModel | null;
 }
 

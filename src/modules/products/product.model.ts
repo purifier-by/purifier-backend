@@ -7,7 +7,7 @@ export interface ProductModelData {
     characteristics: string;
     points: string;
     price: number;
-    brand_id: number | null;
+    brandId: number | null;
 }
 
 class ProductModel {
@@ -19,7 +19,7 @@ class ProductModel {
     price: number;
 
     @Exclude()
-    brand_id: number | null;
+    brandId: number | null;
 
     constructor(productData: ProductModelData) {
         this.id = productData.id;
@@ -28,7 +28,7 @@ class ProductModel {
         this.description = productData.description;
         this.points = productData.points;
         this.price = productData.price;
-        this.brand_id = productData.brand_id;
+        this.brandId = productData.brandId;
     }
 }
 

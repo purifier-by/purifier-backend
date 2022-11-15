@@ -39,7 +39,7 @@ class ProductsRepository {
                     SELECT *
                     FROM brands
                     WHERE
-                        brands.id = products.brand_id
+                        brands.id = products.brandId
                 ) brand
         ) AS "brand"
           FROM products
@@ -63,7 +63,7 @@ class ProductsRepository {
         try {
             await client.query('BEGIN;');
 
-            // ToDo: Do validation if brand_id does no exist
+            // ToDo: Do validation if brandId does no exist
 
             const productResponse = await client.query(
                 `
@@ -73,7 +73,7 @@ class ProductsRepository {
                 characteristics,
                 points,
                 price,
-                brand_id
+                brandId
               ) VALUES (
                 $1,
                 $2,
@@ -83,7 +83,7 @@ class ProductsRepository {
                 $6
               ) RETURNING *
             `,
-                [productData.title, productData.description, productData.characteristics, productData.points, productData.price, productData.brand_id],
+                [productData.title, productData.description, productData.characteristics, productData.points, productData.price, productData.brandId],
             );
 
             const productEntity = productResponse.rows[0];
@@ -107,7 +107,7 @@ class ProductsRepository {
     ) {
         return client.query(
             `
-          DELETE FROM product_images WHERE product_id = $1
+          DELETE FROM product_images WHERE productId = $1
         `,
             [productId],
         );
@@ -124,7 +124,7 @@ class ProductsRepository {
 
         let position = 1
         for (const image of images) {
-            await client.query(`INSERT INTO product_images (url, position, product_id) VALUES ($1, $2, $3) RETURNING *`, [image, position, productId]);
+            await client.query(`INSERT INTO product_images (url, position, productId) VALUES ($1, $2, $3) RETURNING *`, [image, position, productId]);
             position++
         }
 
@@ -142,7 +142,7 @@ class ProductsRepository {
                 SELECT CONCAT('${domain}/', url) AS "url"
                 FROM product_images
                 WHERE
-                    product_id = $1
+                    productId = $1
                 ORDER BY position
             ) AS images
           `,
@@ -168,16 +168,16 @@ class ProductsRepository {
         try {
             await client.query('BEGIN;');
 
-            // ToDo: Do validation if brand_id does no exist
+            // ToDo: Do validation if brandId does no exist
 
             const productResponse = await client.query(
                 `
             UPDATE products
-            SET title = $2, description = $3, characteristics = $4, points = $5, price = $6, brand_id = $7
+            SET title = $2, description = $3, characteristics = $4, points = $5, price = $6, brandId = $7
             WHERE id = $1
             RETURNING *
         `,
-                [id, productData.title, productData.description, productData.characteristics, productData.points, productData.price, productData.brand_id],
+                [id, productData.title, productData.description, productData.characteristics, productData.points, productData.price, productData.brandId],
             );
             const productEntity = productResponse.rows[0];
             if (!productEntity) {

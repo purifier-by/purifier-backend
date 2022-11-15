@@ -23,7 +23,7 @@ class ProductDto {
 
     @IsNumber()
     @IsNotEmpty()
-    brand_id: number;
+    brandId: number;
 
     @IsOptional()
     images?: string[];

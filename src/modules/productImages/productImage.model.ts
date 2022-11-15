@@ -2,20 +2,20 @@ export interface ProductImageModelData {
     id: number;
     position: string;
     url: string;
-    product_id: string;
+    productId: string;
 }
 
 class ProductImageModel {
     id: number;
     position: string;
     url: string;
-    product_id: string;
+    productId: string;
 
     constructor(productImageData: ProductImageModelData) {
         this.id = productImageData.id;
         this.position = productImageData.position;
         this.url = productImageData.url;
-        this.product_id = productImageData.product_id;
+        this.productId = productImageData.productId;
     }
 }
 

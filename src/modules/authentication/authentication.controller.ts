@@ -1,5 +1,4 @@
 import {
-    Body,
     Req,
     Controller,
     HttpCode,
@@ -15,7 +14,10 @@ import { AuthenticationService } from './authentication.service';
 import { LocalAuthenticationGuard } from './localAuthentication.guard';
 import JwtAuthenticationGuard from './jwt-authentication.guard';
 import RequestWithUser from './requestWithUser.interface';
+import { ApiTags } from '@nestjs/swagger';
 
+
+@ApiTags('Auth')
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthenticationController {

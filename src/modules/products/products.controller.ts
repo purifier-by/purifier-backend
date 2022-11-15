@@ -1,10 +1,12 @@
 import { Body, ClassSerializerInterceptor, Controller, Delete, Get, Param, Post, Put, UseGuards, UseInterceptors } from "@nestjs/common";
+import { ApiTags } from "@nestjs/swagger";
 import FindOneParams from "src/utils/findOneParams";
 import JwtAuthenticationGuard from "../authentication/jwt-authentication.guard";
 import ProductDto from "./product.dto";
 import { ProductsService } from "./products.service";
 
 
+@ApiTags('Products')
 @Controller('products')
 @UseInterceptors(ClassSerializerInterceptor)
 export default class ProductsController {

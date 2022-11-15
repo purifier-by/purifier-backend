@@ -98,7 +98,7 @@ class BrandsRepository {
     async delete(id: number) {
         const client = await this.databaseService.getPoolClient();
 
-        await client.query(`UPDATE products set brand_id = NULL where brand_id = $1 RETURNING *`, [id])
+        await client.query(`UPDATE products set brandId = NULL where brandId = $1 RETURNING *`, [id])
 
         const databaseResponse = await client.query(
             `DELETE FROM brands WHERE id=$1`,
