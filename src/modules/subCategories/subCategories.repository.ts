@@ -29,7 +29,7 @@ export class SubCategoriesRepository {
           id, 
           title,
           CONCAT('${domain}/', image) as "image",
-          "categoryId",
+          "categoryId"
           FROM sub_categories
           WHERE sub_categories.id=$1
           `,
@@ -84,7 +84,7 @@ export class SubCategoriesRepository {
             const categoryResponse = await client.query(
                 `
             UPDATE sub_categories
-            SET title = $2, image = $3, categoryId = $4
+            SET title = $2, image = $3, "categoryId" = $4
             WHERE id = $1
             RETURNING *
         `,
@@ -95,6 +95,7 @@ export class SubCategoriesRepository {
                 throw new NotFoundException();
             }
 
+            await client.query(`COMMIT;`);
             return this.getById(id);
         } catch (error) {
             await client.query('ROLLBACK;');
@@ -109,8 +110,6 @@ export class SubCategoriesRepository {
         const client = await this.databaseService.getPoolClient();
 
         await client.query(`UPDATE products set "categoryId" = NULL where "categoryId" = $1 RETURNING *`, [id])
-
-        // TODO: set Null category for product
 
         const databaseResponse = await client.query(
             `DELETE FROM sub_categories WHERE id=$1`,

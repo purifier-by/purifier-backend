@@ -2,14 +2,14 @@ export interface SubCategoryModelData {
     id: number;
     title: string;
     image: string;
-    categoryId: number;
+    categoryId: number | null;
 }
 
 export class SubCategoryModel {
     id: number;
     title: string;
     image: string;
-    categoryId: number;
+    categoryId: number | null;
 
     constructor(categoryData: SubCategoryModelData) {
         this.id = categoryData.id;

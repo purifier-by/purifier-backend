@@ -12,7 +12,7 @@ export interface ProductModelData {
     subCategoryId: number | null;
 }
 
-class ProductModel {
+export class ProductModel {
     id: number;
     title: string;
     description: string;
@@ -41,5 +41,3 @@ class ProductModel {
         this.subCategoryId = productData.subCategoryId;
     }
 }
-
-export default ProductModel;

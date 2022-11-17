@@ -4,7 +4,7 @@ export interface CategoryModelData {
     image: string;
 }
 
-class CategoryModel {
+export class CategoryModel {
     id: number;
     title: string;
     image: string;
@@ -15,5 +15,3 @@ class CategoryModel {
         this.image = categoryData.image;
     }
 }
-
-export default CategoryModel;

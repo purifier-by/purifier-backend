@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
-class ProductDto {
+export class ProductDto {
     @IsString()
     @IsNotEmpty()
     title: string;
@@ -36,5 +36,3 @@ class ProductDto {
     @IsOptional()
     images?: string[];
 }
-
-export default ProductDto;

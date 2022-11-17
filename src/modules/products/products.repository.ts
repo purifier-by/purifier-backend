@@ -3,8 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PoolClient } from 'pg';
 import DatabaseService from '../../database/database.service';
-import ProductDto from './product.dto';
-import ProductModel from './product.model';
+import { ProductDto } from './product.dto';
 import ProductWithDetails from './productWithDetails.model';
 
 @Injectable()
@@ -14,47 +13,66 @@ class ProductsRepository {
     async get(categoryId: number | null, offset = 0, limit: number | null = null) {
         // const next_value = next ? +next : 0;
         const client = await this.databaseService.getPoolClient();
+        const domain = this.configService.get('DOMAIN')
 
         const databaseResponse = await this.databaseService.runQuery(
-            `
-          WITH selected_products AS (
-            SELECT 
-            *, 
-            (
-                SELECT
-                    json_build_object(
-                        'id',
-                        brand.id,
-                        'title',
-                        brand.title
-                    )
-                FROM (
-                        SELECT *
-                        FROM brands
-                        WHERE
-                            brands.id = products."brandId"
-                    ) brand
-            ) AS "brand"
-            FROM products
-            WHERE "categoryId" = $3
-            ORDER BY id ASC
-            OFFSET $1
-            LIMIT $2
-          ),
-          total_products_count_response AS (
-            SELECT COUNT(*)::int AS total_products_count FROM products
-          )
-          SELECT * FROM selected_products, total_products_count_response
-        `,
+            `--sql 
+            WITH selected_products
+            AS (
+                SELECT *
+                    ,(
+                        SELECT json_build_object('id', brand.id, 'title', brand.title)
+                        FROM (
+                            SELECT *
+                            FROM brands
+                            WHERE brands.id = products."brandId"
+                            ) brand
+                        ) AS "brand"
+                    ,(
+                        SELECT json_build_object('id', category.id, 'title', category.title, 'image', CONCAT('${domain}/', category.image))
+                        FROM (
+                            SELECT *
+                            FROM categories
+                            WHERE categories.id = products."categoryId"
+                            ) category
+                        ) AS "category"
+                    , (
+                        SELECT json_build_object('id', "subCategory".id, 'title', "subCategory".title, 'image', CONCAT('${domain}/', "subCategory".image))
+                        FROM (
+                            SELECT *
+                            FROM sub_categories
+                            WHERE sub_categories.id = products."subCategoryId"
+                            ) "subCategory"
+                        ) AS "subCategory"
+                    , (
+                        SELECT ARRAY
+                        (
+                            SELECT CONCAT('${domain}/', url) AS "url"
+                            FROM product_images
+                            WHERE product_images."productId" = products.id
+                            ORDER BY position
+                            )
+                        ) AS images   
+                FROM products
+                WHERE "categoryId" = $3
+                ORDER BY id ASC OFFSET $1 LIMIT $2
+                )
+                ,total_products_count_response
+            AS (
+                SELECT COUNT(*)::INT AS total_products_count
+                FROM products
+                )
+            SELECT *
+            FROM selected_products, total_products_count_response
+            `,
             [offset, limit, categoryId],
         );
-        const items = await Promise.all(databaseResponse.rows.map(
-            async (databaseRow) => {
-                const images = await this.getImageUrlsRelatedToProduct(client, databaseRow.id)
-                return new ProductWithDetails({ ...databaseRow, images });
-            },
-        ));
+
+        const items = databaseResponse.rows.map(
+            (databaseRow) => new ProductWithDetails({ ...databaseRow })
+        );
         const count = databaseResponse.rows[0]?.total_posts_count || 0;
+
         return {
             items,
             count,
@@ -63,41 +81,47 @@ class ProductsRepository {
         };
     }
 
-
-    // async getAll() {
-    //     const databaseResponse = await this.databaseService.runQuery(`
-    //     SELECT * FROM products
-    // `);
-    //     const items = databaseResponse.rows.map(
-    //         (databaseRow) => new ProductModel(databaseRow),
-    //     );
-    //     return { items }
-    // }
-
     async getWithDetails(productId: number) {
         const client = await this.databaseService.getPoolClient();
+        const domain = this.configService.get('DOMAIN')
+
         const productResponse = await client.query(
-            `
-          SELECT
-          *,
-          (
-            SELECT
-                json_build_object(
-                    'id',
-                    brand.id,
-                    'title',
-                    brand.title
-                )
-            FROM (
+            `SELECT *
+            ,(
+                SELECT json_build_object('id', brand.id, 'title', brand.title)
+                FROM (
                     SELECT *
                     FROM brands
-                    WHERE
-                        brands.id = products."brandId"
-                ) brand
-        ) AS "brand"
-          FROM products
-          WHERE products.id=$1
-          `,
+                    WHERE brands.id = products."brandId"
+                    ) brand
+                ) AS "brand"
+            ,(
+                SELECT json_build_object('id', category.id, 'title', category.title, 'image', CONCAT('${domain}/', category.image))
+                FROM (
+                    SELECT *
+                    FROM categories
+                    WHERE categories.id = products."categoryId"
+                    ) category
+                ) AS "category"
+            , (
+                SELECT json_build_object('id', "subCategory".id, 'title', "subCategory".title, 'image', CONCAT('${domain}/', "subCategory".image))
+                FROM (
+                    SELECT *
+                    FROM sub_categories
+                    WHERE sub_categories.id = products."subCategoryId"
+                    ) "subCategory"
+                ) AS "subCategory"
+            , (
+                SELECT ARRAY
+                (
+                    SELECT CONCAT('${domain}/', url) AS "url"
+                    FROM product_images
+                    WHERE product_images."productId" = products.id
+                    ORDER BY position
+                    )
+                ) AS images 
+                FROM products
+            WHERE products.id=$1`,
             [productId],
         );
         const productEntity = productResponse.rows[0];
@@ -106,9 +130,7 @@ class ProductsRepository {
             throw new NotFoundException();
         }
 
-        const images = await this.getImageUrlsRelatedToProduct(client, productId)
-
-        return new ProductWithDetails({ ...productEntity, images });
+        return new ProductWithDetails({ ...productEntity });
     }
 
     async create(productData: ProductDto) {
@@ -116,27 +138,11 @@ class ProductsRepository {
         try {
             await client.query('BEGIN;');
 
-            // TODO: Do validation if brandId does no exist
+            // TODO: Do validation if brandId, categoryId, subCategoryId  does no exist
 
             const productResponse = await client.query(
-                `
-              INSERT INTO products (
-                title,
-                description,
-                characteristics,
-                points,
-                price,
-                brandId
-              ) VALUES (
-                $1,
-                $2,
-                $3,
-                $4,
-                $5,
-                $6
-              ) RETURNING *
-            `,
-                [productData.title, productData.description, productData.characteristics, productData.points, productData.price, productData.brandId],
+                `INSERT INTO products( title, description, characteristics, points, price, "brandId", "categoryId", "subCategoryId") VALUES ( $1,$2, $3, $4, $5, $6, $7, $8 ) RETURNING *`,
+                [productData.title, productData.description, productData.characteristics, productData.points, productData.price, productData.brandId, productData.categoryId, productData.subCategoryId],
             );
 
             const productEntity = productResponse.rows[0];
@@ -190,15 +196,12 @@ class ProductsRepository {
         const domain = this.configService.get('DOMAIN')
 
         const imagesUrlResponse = await client.query(
-            `
-            SELECT ARRAY(
-                SELECT CONCAT('${domain}/', url) AS "url"
+            `SELECT ARRAY
+                (SELECT CONCAT('${domain}/', url) AS "url"
                 FROM product_images
-                WHERE
-                    "productId" = $1
-                ORDER BY position
-            ) AS images
-          `,
+                WHERE "productId" = $1
+                ORDER BY  position ) AS images
+            `,
             [productId],
         );
 
@@ -221,16 +224,20 @@ class ProductsRepository {
         try {
             await client.query('BEGIN;');
 
-            // TODO: Do validation if brandId does no exist
+            // TODO: Do validation if brandId, categoryId, subCategoryId  does no exist
 
             const productResponse = await client.query(
-                `
-            UPDATE products
-            SET title = $2, description = $3, characteristics = $4, points = $5, price = $6, brandId = $7
-            WHERE id = $1
-            RETURNING *
-        `,
-                [id, productData.title, productData.description, productData.characteristics, productData.points, productData.price, productData.brandId],
+                `UPDATE 
+                        products SET title = $2,
+                        description = $3,
+                        characteristics = $4,
+                        points = $5,
+                        price = $6,
+                        "brandId" = $7,
+                        "categoryId" = $8,
+                        "subCategoryId" = $9
+                WHERE id = $1 RETURNING *`,
+                [id, productData.title, productData.description, productData.characteristics, productData.points, productData.price, productData.brandId, productData.categoryId, productData.subCategoryId],
             );
             const productEntity = productResponse.rows[0];
             if (!productEntity) {

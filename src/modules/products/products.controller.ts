@@ -4,7 +4,7 @@ import FindOneParams from "src/utils/findOneParams";
 import PaginationParams from "src/utils/paginationParams";
 import JwtAuthenticationGuard from "../authentication/jwt-authentication.guard";
 import { GetProductsByCategoryQuery } from "./getProductsByCategoryQuery";
-import ProductDto from "./product.dto";
+import { ProductDto } from "./product.dto";
 import { ProductsService } from "./products.service";
 import { SearchProductsQuery } from "./searchProductsQuery";
 
@@ -36,6 +36,7 @@ export default class ProductsController {
     }
 
     @Put(':id')
+    @UseGuards(JwtAuthenticationGuard)
     updateProduct(@Param() { id }: FindOneParams, @Body() productData: ProductDto) {
         return this.productsService.updateProduct(id, productData);
     }
@@ -47,6 +48,7 @@ export default class ProductsController {
     }
 
     @Delete(':id')
+    @UseGuards(JwtAuthenticationGuard)
     deleteProduct(@Param() { id }: FindOneParams) {
         return this.productsService.deleteProduct(id);
     }

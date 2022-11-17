@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import DatabaseService from '../../database/database.service';
 import CategoryDto from './category.dto';
-import CategoryModel from './category.model';
+import { CategoryWithDetails } from './categoryWithDetails.model';
 
 @Injectable()
 class CategoriesRepository {
@@ -12,10 +12,18 @@ class CategoriesRepository {
         const domain = this.configService.get('DOMAIN')
 
         const databaseResponse = await this.databaseService.runQuery(`
-        SELECT id, title, CONCAT('${domain}/', image) AS "image" FROM categories
-    `);
+            SELECT 
+                id, 
+                title, 
+                CONCAT('${domain}/', image) AS "image",  
+                (SELECT json_agg(row_to_json(sub_categories))
+                FROM sub_categories
+                WHERE  sub_categories."categoryId" = categories.id) as "subCategories"
+                FROM categories
+        `);
+
         return databaseResponse.rows.map(
-            (databaseRow) => new CategoryModel(databaseRow),
+            (databaseRow) => new CategoryWithDetails(databaseRow),
         );
     }
 
@@ -27,7 +35,10 @@ class CategoriesRepository {
           SELECT
           id, 
           title,
-          CONCAT('${domain}/', image) as "image"
+          CONCAT('${domain}/', image) as "image",
+          (SELECT json_agg(row_to_json(sub_categories))
+                FROM sub_categories
+                WHERE  sub_categories."categoryId" = categories.id) as "subCategories"
           FROM categories
           WHERE categories.id=$1
           `,
@@ -39,7 +50,7 @@ class CategoriesRepository {
             throw new NotFoundException();
         }
 
-        return new CategoryModel({ ...categoryEntity });
+        return new CategoryWithDetails({ ...categoryEntity });
     }
 
     async create(categoryData: CategoryDto) {
@@ -91,6 +102,7 @@ class CategoriesRepository {
                 throw new NotFoundException();
             }
 
+            await client.query(`COMMIT;`);
             return this.getById(id);
         } catch (error) {
             await client.query('ROLLBACK;');
@@ -104,9 +116,9 @@ class CategoriesRepository {
     async delete(id: number) {
         const client = await this.databaseService.getPoolClient();
 
-        await client.query(`UPDATE products set categoryId = NULL where categoryId = $1 RETURNING *`, [id])
+        await client.query(`UPDATE products set "categoryId" = NULL where "categoryId" = $1 RETURNING *`, [id])
+        await client.query(`UPDATE sub_categories set "categoryId" = NULL where "categoryId" = $1 RETURNING *`, [id])
 
-        // TODO: set Null subcategory and category for product
         const databaseResponse = await client.query(
             `DELETE FROM categories WHERE id=$1`,
             [id],

@@ -13,28 +13,28 @@ export class SubCategoriesController {
     constructor(private readonly subCategoriesService: SubCategoriesService) { }
 
     @Get()
-    getCategories() {
+    getSubCategories() {
         return this.subCategoriesService.getCategories();
     }
 
     @Get(':id')
-    getCategoryById(@Param() { id }: FindOneParams) {
+    getSubCategoryById(@Param() { id }: FindOneParams) {
         return this.subCategoriesService.getCategoryById(id);
     }
 
     @Put(':id')
-    updateCategory(@Param() { id }: FindOneParams, @Body() categoryData: SubCategoryDto) {
+    updateSubCategory(@Param() { id }: FindOneParams, @Body() categoryData: SubCategoryDto) {
         return this.subCategoriesService.updateCategory(id, categoryData);
     }
 
     @Post()
     @UseGuards(JwtAuthenticationGuard)
-    createCategory(@Body() categoryData: SubCategoryDto) {
+    createSubCategory(@Body() categoryData: SubCategoryDto) {
         return this.subCategoriesService.createCategory(categoryData);
     }
 
     @Delete(':id')
-    deleteCategory(@Param() { id }: FindOneParams) {
+    deleteSubCategory(@Param() { id }: FindOneParams) {
         return this.subCategoriesService.deleteCategory(id);
     }
 }
