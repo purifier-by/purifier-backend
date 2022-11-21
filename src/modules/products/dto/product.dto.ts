@@ -1,4 +1,6 @@
+import { Transform, Type } from 'class-transformer';
 import { IsString, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { substringDomain } from 'src/utils/substringDomain';
 
 export class ProductDto {
     @IsString()
@@ -33,6 +35,10 @@ export class ProductDto {
     @IsNotEmpty()
     subCategoryId: number;
 
+
+    // @IsString({ each: true })
+    // @Type(() => String)
     @IsOptional()
+    @Transform(({ value }) => value.map(substringDomain))
     images?: string[];
 }

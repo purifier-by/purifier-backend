@@ -2,10 +2,12 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
+import { ValidationPipe } from '@nestjs/common';
 
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.use(cookieParser());
 
 
@@ -13,24 +15,11 @@ async function bootstrap() {
     .setTitle('Cats example')
     .setDescription('The cats API description')
     .setVersion('1.0')
-    .addBearerAuth(undefined, 'defaultBearerAuth')
+    .addCookieAuth()
     .build();
 
   const options = {
     swaggerOptions: {
-      authAction: {
-        defaultBearerAuth: {
-          name: 'defaultBearerAuth',
-          schema: {
-            description: 'Default',
-            type: 'http',
-            in: 'header',
-            scheme: 'bearer',
-            bearerFormat: 'JWT',
-          },
-          value: 'thisIsASampleBearerAuthToken123',
-        },
-      },
     },
   };
 

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { ProductDto } from "./product.dto";
+import { ProductDto } from "./dto/product.dto";
 import ProductsRepository from "./products.repository";
 
 @Injectable()
@@ -10,39 +10,25 @@ export class ProductsService {
 
     getProducts(
         categoryId?: number,
-        offset?: number,
-        limit?: number,
-        idsToSkip?: number,
+        subCategoryIds?: number[],
+        priceMin?: number,
+        priceMax?: number,
+        sort?: string,
+        orderBy?: string,
+        next?: number | null,
         searchQuery?: string,
     ) {
 
-        // if (categoryId && searchQuery) {
-        //     return this.postsSearchRepository.searchByAuthor(
-        //         authorId,
-        //         offset,
-        //         limit,
-        //         idsToSkip,
-        //         searchQuery,
-        //     );
-        // }
 
-        if (categoryId) {
-            return this.productsRepository.get(
-                categoryId,
-                offset,
-                limit,
-            );
-        }
-
-        // if (searchQuery) {
-        //     return this.postsSearchRepository.search(
-        //         offset,
-        //         limit,
-        //         idsToSkip,
-        //         searchQuery,
-        //     );
-        // }
-        return this.productsRepository.get(categoryId, offset, limit);
+        return this.productsRepository.get(
+            categoryId,
+            subCategoryIds,
+            priceMin,
+            priceMax,
+            sort,
+            orderBy,
+            next,
+        );
     }
 
     getProductById(id: number) {

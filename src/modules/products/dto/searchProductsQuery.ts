@@ -1,7 +1,7 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class SearchProductsQuery {
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     search?: string;
 }

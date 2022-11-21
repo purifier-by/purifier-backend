@@ -1,4 +1,6 @@
 
 ## Run seeds
 
-docker exec -it nestjs npx knex seed:run
+<!-- docker exec -it nestjs  -->
+npx knex run migrate:latest
+npx knex seed:run

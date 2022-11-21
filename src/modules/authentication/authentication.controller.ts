@@ -14,7 +14,8 @@ import { AuthenticationService } from './authentication.service';
 import { LocalAuthenticationGuard } from './localAuthentication.guard';
 import JwtAuthenticationGuard from './jwt-authentication.guard';
 import RequestWithUser from './requestWithUser.interface';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { LoginDto } from './dto/login.dto';
 
 
 @ApiTags('Auth')
@@ -26,6 +27,7 @@ export class AuthenticationController {
     @HttpCode(200)
     @UseGuards(LocalAuthenticationGuard)
     @Post('login')
+    @ApiBody({ type: LoginDto })
     async logIn(
         @Req() request: RequestWithUser,
         @Res({ passthrough: true }) response: Response,

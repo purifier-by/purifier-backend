@@ -1,5 +1,5 @@
 import { Body, ClassSerializerInterceptor, Controller, Delete, Get, Param, Post, Put, UseGuards, UseInterceptors } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
 import FindOneParams from "src/utils/findOneParams";
 import JwtAuthenticationGuard from "../authentication/jwt-authentication.guard";
 import BrandDto from "./brand.dto";
@@ -23,17 +23,22 @@ export default class BrandsController {
     }
 
     @Put(':id')
+    @ApiCookieAuth()
+    @UseGuards(JwtAuthenticationGuard)
     updateBrand(@Param() { id }: FindOneParams, @Body() brandData: BrandDto) {
         return this.brandsService.updateBrand(id, brandData);
     }
 
     @Post()
+    @ApiCookieAuth()
     @UseGuards(JwtAuthenticationGuard)
     createBrand(@Body() brandData: BrandDto) {
         return this.brandsService.createBrand(brandData);
     }
 
     @Delete(':id')
+    @ApiCookieAuth()
+    @UseGuards(JwtAuthenticationGuard)
     deleteBrand(@Param() { id }: FindOneParams) {
         return this.brandsService.deleteBrand(id);
     }

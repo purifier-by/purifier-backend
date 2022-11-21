@@ -11,15 +11,21 @@ class CategoriesRepository {
     async getAll() {
         const domain = this.configService.get('DOMAIN')
 
-        const databaseResponse = await this.databaseService.runQuery(`
-            SELECT 
-                id, 
-                title, 
-                CONCAT('${domain}/', image) AS "image",  
-                (SELECT json_agg(row_to_json(sub_categories))
-                FROM sub_categories
-                WHERE  sub_categories."categoryId" = categories.id) as "subCategories"
-                FROM categories
+        const databaseResponse = await this.databaseService.runQuery(
+            `SELECT id,
+                    title,
+                    CONCAT('${domain}/', image) AS "image",
+                    (
+                        SELECT json_agg(row_to_json(sub_categories))
+                        FROM sub_categories
+                        WHERE sub_categories."categoryId" = categories.id
+                    ) as "subCategories",
+                    (
+                        SELECT COUNT(*)
+                        FROM products
+                        WHERE products."categoryId" = categories.id
+                    ) AS "totalProductsCount"
+            FROM categories
         `);
 
         return databaseResponse.rows.map(
