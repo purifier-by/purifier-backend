@@ -8,22 +8,20 @@ import { Request } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-    constructor(
-        configService: ConfigService,
-        readonly userService: UsersService,
-    ) {
-        super({
-            jwtFromRequest: ExtractJwt.fromExtractors([
-                (request: Request) => {
-                    return request?.cookies?.Authentication;
-                },
-            ]),
-            ignoreExpiration: true,
-            secretOrKey: configService.get('JWT_SECRET'),
-        });
-    }
+  constructor(
+    configService: ConfigService,
+    readonly userService: UsersService,
+  ) {
+    super({
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ]),
+      ignoreExpiration: true,
+      secretOrKey: configService.get('JWT_SECRET'),
+    });
+  }
 
-    async validate(payload: TokenPayload) {
-        return this.userService.getById(payload.userId);
-    }
+  async validate(payload: TokenPayload) {
+    return this.userService.getById(payload.userId);
+  }
 }
