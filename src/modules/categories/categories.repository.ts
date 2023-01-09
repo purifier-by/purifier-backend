@@ -6,13 +6,16 @@ import { CategoryWithDetails } from './categoryWithDetails.model';
 
 @Injectable()
 class CategoriesRepository {
-    constructor(private readonly databaseService: DatabaseService, private readonly configService: ConfigService,) { }
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly configService: ConfigService,
+  ) {}
 
-    async getAll() {
-        const domain = this.configService.get('DOMAIN')
+  async getAll() {
+    const domain = this.configService.get('DOMAIN');
 
-        const databaseResponse = await this.databaseService.runQuery(
-            `SELECT id,
+    const databaseResponse = await this.databaseService.runQuery(
+      `SELECT id,
                     title,
                     CONCAT('${domain}/', image) AS "image",
                     (
@@ -26,18 +29,19 @@ class CategoriesRepository {
                         WHERE products."categoryId" = categories.id
                     ) AS "totalProductsCount"
             FROM categories
-        `);
+        `,
+    );
 
-        return databaseResponse.rows.map(
-            (databaseRow) => new CategoryWithDetails(databaseRow),
-        );
-    }
+    return databaseResponse.rows.map(
+      (databaseRow) => new CategoryWithDetails(databaseRow),
+    );
+  }
 
-    async getById(id: number) {
-        const domain = this.configService.get('DOMAIN')
+  async getById(id: number) {
+    const domain = this.configService.get('DOMAIN');
 
-        const categoryResponse = await this.databaseService.runQuery(
-            `
+    const categoryResponse = await this.databaseService.runQuery(
+      `
           SELECT
           id, 
           title,
@@ -48,23 +52,23 @@ class CategoriesRepository {
           FROM categories
           WHERE categories.id=$1
           `,
-            [id],
-        );
-        const categoryEntity = categoryResponse.rows[0];
+      [id],
+    );
+    const categoryEntity = categoryResponse.rows[0];
 
-        if (!categoryEntity) {
-            throw new NotFoundException();
-        }
-
-        return new CategoryWithDetails({ ...categoryEntity });
+    if (!categoryEntity) {
+      throw new NotFoundException();
     }
 
-    async create(categoryData: CategoryDto) {
-        const client = await this.databaseService.getPoolClient();
-        try {
-            await client.query('BEGIN;');
-            const categoryResponse = await client.query(
-                `
+    return new CategoryWithDetails({ ...categoryEntity });
+  }
+
+  async create(categoryData: CategoryDto) {
+    const client = await this.databaseService.getPoolClient();
+    try {
+      await client.query('BEGIN;');
+      const categoryResponse = await client.query(
+        `
               INSERT INTO categories (
                 title,
                 image
@@ -73,67 +77,78 @@ class CategoriesRepository {
                 $2
               ) RETURNING *
             `,
-                [categoryData.title, categoryData.image],
-            );
+        [categoryData.title, categoryData.image],
+      );
 
-            const categoryEntity = categoryResponse.rows[0];
+      const categoryEntity = categoryResponse.rows[0];
 
-            await client.query(`COMMIT;`);
-            return this.getById(categoryEntity.id);
-        } catch (error) {
-            await client.query('ROLLBACK;');
-            throw error;
-        } finally {
-            client.release();
-        }
+      await client.query(`COMMIT;`);
+      return this.getById(categoryEntity.id);
+    } catch (error) {
+      await client.query('ROLLBACK;');
+      throw error;
+    } finally {
+      client.release();
     }
+  }
 
-    async update(id: number, categoryData: CategoryDto) {
-        const client = await this.databaseService.getPoolClient();
+  async update(id: number, categoryData: CategoryDto) {
+    const client = await this.databaseService.getPoolClient();
 
-        try {
-            await client.query('BEGIN;');
+    try {
+      await client.query('BEGIN;');
 
-            const categoryResponse = await client.query(
-                `
+      const categoryResponse = await client.query(
+        `
             UPDATE categories
             SET title = $2, image = $3
             WHERE id = $1
             RETURNING *
         `,
-                [id, categoryData.title, categoryData.image],
-            );
-            const categoryEntity = categoryResponse.rows[0];
-            if (!categoryEntity) {
-                throw new NotFoundException();
-            }
+        [id, categoryData.title, categoryData.image],
+      );
+      const categoryEntity = categoryResponse.rows[0];
+      if (!categoryEntity) {
+        throw new NotFoundException();
+      }
 
-            await client.query(`COMMIT;`);
-            return this.getById(id);
-        } catch (error) {
-            await client.query('ROLLBACK;');
-            throw error;
-        } finally {
-            client.release();
-        }
+      await client.query(`COMMIT;`);
+      return this.getById(id);
+    } catch (error) {
+      await client.query('ROLLBACK;');
+      throw error;
+    } finally {
+      client.release();
     }
+  }
 
+  async delete(id: number) {
+    const client = await this.databaseService.getPoolClient();
 
-    async delete(id: number) {
-        const client = await this.databaseService.getPoolClient();
+    try {
+      await client.query(
+        `UPDATE products set "categoryId" = NULL where "categoryId" = $1 RETURNING *`,
+        [id],
+      );
+      await client.query(
+        `UPDATE sub_categories set "categoryId" = NULL where "categoryId" = $1 RETURNING *`,
+        [id],
+      );
 
-        await client.query(`UPDATE products set "categoryId" = NULL where "categoryId" = $1 RETURNING *`, [id])
-        await client.query(`UPDATE sub_categories set "categoryId" = NULL where "categoryId" = $1 RETURNING *`, [id])
+      const databaseResponse = await client.query(
+        `DELETE FROM categories WHERE id=$1`,
+        [id],
+      );
 
-        const databaseResponse = await client.query(
-            `DELETE FROM categories WHERE id=$1`,
-            [id],
-        );
-
-        if (databaseResponse.rowCount === 0) {
-            throw new NotFoundException();
-        }
+      if (databaseResponse.rowCount === 0) {
+        throw new NotFoundException();
+      }
+    } catch (error) {
+      throw error;
+    } finally {
+      client.release();
     }
+  }
 }
 
 export default CategoriesRepository;

@@ -1,55 +1,58 @@
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PoolClient } from 'pg';
 import DatabaseService from '../../database/database.service';
 import { ProductDto } from './dto/product.dto';
 import ProductWithDetails from './productWithDetails.model';
+import e from 'express';
 
 @Injectable()
 class ProductsRepository {
-    constructor(private readonly databaseService: DatabaseService, private readonly configService: ConfigService,) { }
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly configService: ConfigService,
+  ) {}
 
-    async get(
-        categoryId: number,
-        subCategoryIds: number[],
-        priceMin: number | null,
-        priceMax: number | null,
-        orderBy: string,
-        sort: string,
-        next: number | null = 1
-    ) {
-        const limit = 2;
-        const page = ((next - 1) * limit);
+  async get(
+    categoryId: number,
+    subCategoryIds: number[],
+    priceMin: number | null,
+    priceMax: number | null,
+    orderBy: string,
+    sort: string,
+    next: number | null = 1,
+  ) {
+    const limit = 2;
+    const page = (next - 1) * limit;
 
-        // const client = await this.databaseService.getPoolClient();
-        const domain = this.configService.get('DOMAIN');
+    // const client = await this.databaseService.getPoolClient();
+    const domain = this.configService.get('DOMAIN');
 
-        let whereSql = [];
+    let whereSql = [];
 
-        if (priceMin & priceMax) {
-            whereSql.push(`price BETWEEN ${priceMin} AND ${priceMax}`)
-        } else if (priceMin) {
-            whereSql.push(`price >= ${priceMin}`)
-        } else if (priceMax) {
-            whereSql.push(`price <= ${priceMax}`)
-        };
+    if (priceMin & priceMax) {
+      whereSql.push(`price BETWEEN ${priceMin} AND ${priceMax}`);
+    } else if (priceMin) {
+      whereSql.push(`price >= ${priceMin}`);
+    } else if (priceMax) {
+      whereSql.push(`price <= ${priceMax}`);
+    }
 
-        if (categoryId) {
-            whereSql.push(`"categoryId" = ${categoryId}`)
-        };
+    if (categoryId) {
+      whereSql.push(`"categoryId" = ${categoryId}`);
+    }
 
-        if (subCategoryIds) {
-            whereSql.push(`"subCategoryId" IN (${subCategoryIds.join(',')})`)
-        };
+    if (subCategoryIds) {
+      whereSql.push(`"subCategoryId" IN (${subCategoryIds.join(',')})`);
+    }
 
-        let whereSqlQuery = ``
+    let whereSqlQuery = ``;
 
-        if (whereSql.length > 0) {
-            whereSqlQuery = 'WHERE ' + whereSql.join(' AND ')
-        };
+    if (whereSql.length > 0) {
+      whereSqlQuery = 'WHERE ' + whereSql.join(' AND ');
+    }
 
-        const sqlQuery = `--sql 
+    const sqlQuery = `--sql 
         WITH selected_products
         AS (
             SELECT *
@@ -100,32 +103,33 @@ class ProductsRepository {
             )
         SELECT *
         FROM selected_products, total_products_count_response;
-        `
+        `;
 
-        // console.log(sqlQuery)
+    // console.log(sqlQuery)
 
-        const databaseResponse = await this.databaseService.runQuery(sqlQuery);
+    const databaseResponse = await this.databaseService.runQuery(sqlQuery);
 
-        const items = databaseResponse.rows.map(
-            (databaseRow) => new ProductWithDetails({ ...databaseRow })
-        );
-        const count = databaseResponse.rows[0]?.total_products_count || 0;
+    const items = databaseResponse.rows.map(
+      (databaseRow) => new ProductWithDetails({ ...databaseRow }),
+    );
+    const count = databaseResponse.rows[0]?.total_products_count || 0;
 
-        const hasNextPage = (count - (page + limit)) > 0
+    const hasNextPage = count - (page + limit) > 0;
 
-        return {
-            items,
-            "totalCount": count,
-            "next": hasNextPage ? next + 1 : null
-        };
-    }
+    return {
+      items,
+      totalCount: count,
+      next: hasNextPage ? next + 1 : null,
+    };
+  }
 
-    async getWithDetails(productId: number) {
-        const client = await this.databaseService.getPoolClient();
-        const domain = this.configService.get('DOMAIN')
+  async getWithDetails(productId: number) {
+    const client = await this.databaseService.getPoolClient();
+    const domain = this.configService.get('DOMAIN');
 
-        const productResponse = await client.query(
-            `SELECT *
+    try {
+      const productResponse = await client.query(
+        `SELECT *
             , (
                 SELECT json_build_object('id', brand.id, 'title', brand.title)
                 FROM(
@@ -161,112 +165,128 @@ class ProductsRepository {
                 ) AS images 
                 FROM products
             WHERE products.id = $1`,
-            [productId],
-        );
-        const productEntity = productResponse.rows[0];
+        [productId],
+      );
+      const productEntity = productResponse.rows[0];
 
-        if (!productEntity) {
-            throw new NotFoundException();
-        }
+      if (!productEntity) {
+        throw new NotFoundException();
+      }
 
-        return new ProductWithDetails({ ...productEntity });
+      return new ProductWithDetails({ ...productEntity });
+    } catch (error) {
+      throw error;
+    } finally {
+      client.release();
     }
+  }
 
-    async create(productData: ProductDto) {
-        const client = await this.databaseService.getPoolClient();
-        try {
-            await client.query('BEGIN;');
+  async create(productData: ProductDto) {
+    const client = await this.databaseService.getPoolClient();
+    try {
+      await client.query('BEGIN;');
 
-            // TODO: Do validation if brandId, categoryId, subCategoryId  does no exist
+      // TODO: Do validation if brandId, categoryId, subCategoryId  does no exist
 
-            const productResponse = await client.query(
-                `INSERT INTO products(title, description, characteristics, points, price, "brandId", "categoryId", "subCategoryId") VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING * `,
-                [productData.title, productData.description, productData.characteristics, productData.points, productData.price, productData.brandId, productData.categoryId, productData.subCategoryId],
-            );
+      const productResponse = await client.query(
+        `INSERT INTO products(title, description, characteristics, points, price, "brandId", "categoryId", "subCategoryId") VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING * `,
+        [
+          productData.title,
+          productData.description,
+          productData.characteristics,
+          productData.points,
+          productData.price,
+          productData.brandId,
+          productData.categoryId,
+          productData.subCategoryId,
+        ],
+      );
 
-            const productEntity = productResponse.rows[0];
+      const productEntity = productResponse.rows[0];
 
-            await this.addImagesToProduct(client, productEntity.id, productData.images)
+      await this.addImagesToProduct(
+        client,
+        productEntity.id,
+        productData.images,
+      );
 
-            await client.query(`COMMIT; `);
-            return this.getWithDetails(productEntity.id);
-        } catch (error) {
-            await client.query('ROLLBACK;');
-            throw error;
-        } finally {
-            client.release();
-        }
+      await client.query(`COMMIT; `);
+      return this.getWithDetails(productEntity.id);
+    } catch (error) {
+      await client.query('ROLLBACK;');
+      throw error;
+    } finally {
+      client.release();
     }
+  }
 
-
-    private async removeImagesFromProduct(
-        client: PoolClient,
-        productId: number,
-    ) {
-        return client.query(
-            `
+  private async removeImagesFromProduct(client: PoolClient, productId: number) {
+    return client.query(
+      `
           DELETE FROM product_images WHERE "productId" = $1
             `,
-            [productId],
-        );
+      [productId],
+    );
+  }
+
+  private async addImagesToProduct(
+    client: PoolClient,
+    productId: number,
+    images: string[] | null,
+  ) {
+    if (!images || images.length < 1) {
+      return;
     }
 
-    private async addImagesToProduct(
-        client: PoolClient,
-        productId: number,
-        images: string[] | null
-    ) {
-        if (!images || images.length < 1) {
-            return;
-        }
-
-        let position = 1
-        for (const image of images) {
-            await client.query(`INSERT INTO product_images(url, position, "productId") VALUES($1, $2, $3) RETURNING * `, [image, position, productId]);
-            position++
-        }
-
+    let position = 1;
+    for (const image of images) {
+      await client.query(
+        `INSERT INTO product_images(url, position, "productId") VALUES($1, $2, $3) RETURNING * `,
+        [image, position, productId],
+      );
+      position++;
     }
+  }
 
-    private async getImageUrlsRelatedToProduct(
-        client: PoolClient,
-        productId: number,
-    ): Promise<number[]> {
-        const domain = this.configService.get('DOMAIN')
+  private async getImageUrlsRelatedToProduct(
+    client: PoolClient,
+    productId: number,
+  ): Promise<number[]> {
+    const domain = this.configService.get('DOMAIN');
 
-        const imagesUrlResponse = await client.query(
-            `SELECT ARRAY
+    const imagesUrlResponse = await client.query(
+      `SELECT ARRAY
             (SELECT CONCAT('${domain}/', url) AS "url"
                 FROM product_images
                 WHERE "productId" = $1
                 ORDER BY  position) AS images
             `,
-            [productId],
-        );
+      [productId],
+    );
 
-        return imagesUrlResponse.rows[0].images;
-    }
+    return imagesUrlResponse.rows[0].images;
+  }
 
-    private async updateImages(
-        client: PoolClient,
-        productId: number,
-        newImages: string[],
-    ) {
-        await this.removeImagesFromProduct(client, productId)
-        await this.addImagesToProduct(client, productId, newImages)
-        return await this.getImageUrlsRelatedToProduct(client, productId)
-    }
+  private async updateImages(
+    client: PoolClient,
+    productId: number,
+    newImages: string[],
+  ) {
+    await this.removeImagesFromProduct(client, productId);
+    await this.addImagesToProduct(client, productId, newImages);
+    return await this.getImageUrlsRelatedToProduct(client, productId);
+  }
 
-    async update(id: number, productData: ProductDto) {
-        const client = await this.databaseService.getPoolClient();
+  async update(id: number, productData: ProductDto) {
+    const client = await this.databaseService.getPoolClient();
 
-        try {
-            await client.query('BEGIN;');
+    try {
+      await client.query('BEGIN;');
 
-            // TODO: Do validation if brandId, categoryId, subCategoryId  does no exist
+      // TODO: Do validation if brandId, categoryId, subCategoryId  does no exist
 
-            const productResponse = await client.query(
-                `UPDATE 
+      const productResponse = await client.query(
+        `UPDATE 
                         products SET title = $2,
             description = $3,
             characteristics = $4,
@@ -276,38 +296,54 @@ class ProductsRepository {
             "categoryId" = $8,
             "subCategoryId" = $9
                 WHERE id = $1 RETURNING * `,
-                [id, productData.title, productData.description, productData.characteristics, productData.points, productData.price, productData.brandId, productData.categoryId, productData.subCategoryId],
-            );
-            const productEntity = productResponse.rows[0];
-            if (!productEntity) {
-                throw new NotFoundException();
-            }
+        [
+          id,
+          productData.title,
+          productData.description,
+          productData.characteristics,
+          productData.points,
+          productData.price,
+          productData.brandId,
+          productData.categoryId,
+          productData.subCategoryId,
+        ],
+      );
+      const productEntity = productResponse.rows[0];
+      if (!productEntity) {
+        throw new NotFoundException();
+      }
 
-            await this.updateImages(client, id, productData.images)
+      await this.updateImages(client, id, productData.images);
 
-            await client.query(`COMMIT; `);
-            return this.getWithDetails(productEntity.id);
-        } catch (error) {
-            await client.query('ROLLBACK;');
-            throw error;
-        } finally {
-            client.release();
-        }
+      await client.query(`COMMIT; `);
+      return this.getWithDetails(productEntity.id);
+    } catch (error) {
+      await client.query('ROLLBACK;');
+      throw error;
+    } finally {
+      client.release();
     }
+  }
 
+  async delete(id: number) {
+    const client = await this.databaseService.getPoolClient();
 
-    async delete(id: number) {
-        const client = await this.databaseService.getPoolClient();
-        await this.removeImagesFromProduct(client, id)
-        const databaseResponse = await client.query(
-            `DELETE FROM products WHERE id = $1`,
-            [id],
-        );
+    try {
+      await this.removeImagesFromProduct(client, id);
+      const databaseResponse = await client.query(
+        `DELETE FROM products WHERE id = $1`,
+        [id],
+      );
 
-        if (databaseResponse.rowCount === 0) {
-            throw new NotFoundException();
-        }
+      if (databaseResponse.rowCount === 0) {
+        throw new NotFoundException();
+      }
+    } catch (error) {
+      throw error;
+    } finally {
+      client.release();
     }
+  }
 }
 
 export default ProductsRepository;

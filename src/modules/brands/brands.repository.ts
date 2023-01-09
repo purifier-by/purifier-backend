@@ -22,22 +22,28 @@ class BrandsRepository {
 
   async getById(id: number) {
     const client = await this.databaseService.getPoolClient();
-    const brandResponse = await client.query(
-      `
+    try {
+      const brandResponse = await client.query(
+        `
           SELECT
            *
           FROM brands
           WHERE brands.id=$1
           `,
-      [id],
-    );
-    const brandEntity = brandResponse.rows[0];
+        [id],
+      );
+      const brandEntity = brandResponse.rows[0];
 
-    if (!brandEntity) {
-      throw new NotFoundException();
+      if (!brandEntity) {
+        throw new NotFoundException();
+      }
+
+      return new BrandModel({ ...brandEntity });
+    } catch (err) {
+      throw err;
+    } finally {
+      client.release();
     }
-
-    return new BrandModel({ ...brandEntity });
   }
 
   async create(brandData: BrandDto) {
@@ -99,18 +105,24 @@ class BrandsRepository {
   async delete(id: number) {
     const client = await this.databaseService.getPoolClient();
 
-    await client.query(
-      `UPDATE products set "brandId" = NULL where "brandId" = $1 RETURNING *`,
-      [id],
-    );
+    try {
+      await client.query(
+        `UPDATE products set "brandId" = NULL where "brandId" = $1 RETURNING *`,
+        [id],
+      );
 
-    const databaseResponse = await client.query(
-      `DELETE FROM brands WHERE id=$1`,
-      [id],
-    );
+      const databaseResponse = await client.query(
+        `DELETE FROM brands WHERE id=$1`,
+        [id],
+      );
 
-    if (databaseResponse.rowCount === 0) {
-      throw new NotFoundException();
+      if (databaseResponse.rowCount === 0) {
+        throw new NotFoundException();
+      }
+    } catch (error) {
+      throw error;
+    } finally {
+      client.release();
     }
   }
 }
