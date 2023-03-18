@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import FindOneParams from 'src/utils/findOneParams';
-import JwtAuthenticationGuard from '../authentication/jwt-authentication.guard';
+import { JwtAuthGuard } from '../authentication/jwt-authentication.guard';
 import CategoryDto from './category.dto';
 import { CategoriesService } from './categories.service';
 
@@ -33,7 +33,7 @@ export default class CategoriesController {
   }
 
   @Put(':id')
-  @ApiBearerAuth('defaultBearerAuth')
+  @ApiBearerAuth()
   updateCategory(
     @Param() { id }: FindOneParams,
     @Body() categoryData: CategoryDto,
@@ -42,14 +42,14 @@ export default class CategoriesController {
   }
 
   @Post()
-  @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthenticationGuard)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   createCategory(@Body() categoryData: CategoryDto) {
     return this.categoriesService.createCategory(categoryData);
   }
 
   @Delete(':id')
-  @ApiBearerAuth('defaultBearerAuth')
+  @ApiBearerAuth()
   deleteCategory(@Param() { id }: FindOneParams) {
     return this.categoriesService.deleteCategory(id);
   }

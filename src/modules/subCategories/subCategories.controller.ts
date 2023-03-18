@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import FindOneParams from 'src/utils/findOneParams';
-import JwtAuthenticationGuard from '../authentication/jwt-authentication.guard';
+import { JwtAuthGuard } from '../authentication/jwt-authentication.guard';
 import { SubCategoryDto } from './subCategory.dto';
 import { SubCategoriesService } from './subCategories.service';
 
@@ -34,7 +34,7 @@ export class SubCategoriesController {
 
   @Put(':id')
   @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(JwtAuthGuard)
   updateSubCategory(
     @Param() { id }: FindOneParams,
     @Body() categoryData: SubCategoryDto,
@@ -44,14 +44,14 @@ export class SubCategoriesController {
 
   @Post()
   @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(JwtAuthGuard)
   createSubCategory(@Body() categoryData: SubCategoryDto) {
     return this.subCategoriesService.createCategory(categoryData);
   }
 
   @Delete(':id')
   @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(JwtAuthGuard)
   deleteSubCategory(@Param() { id }: FindOneParams) {
     return this.subCategoriesService.deleteCategory(id);
   }

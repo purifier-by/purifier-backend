@@ -6,12 +6,12 @@ import UserModel from '../users/user.model';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
-    constructor(private authenticationService: AuthenticationService) {
-        super({
-            usernameField: 'login',
-        });
-    }
-    async validate(login: string, password: string): Promise<UserModel> {
-        return this.authenticationService.getAuthenticatedUser(login, password);
-    }
+  constructor(private authenticationService: AuthenticationService) {
+    super({
+      usernameField: 'login',
+    });
+  }
+  async validate(login: string, password: string): Promise<UserModel> {
+    return this.authenticationService.getAuthenticatedUser(login, password);
+  }
 }

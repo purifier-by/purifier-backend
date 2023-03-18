@@ -1,6 +1,6 @@
 interface TokenPayload {
-    userId: number;
-    login: string;
+  userId: number;
+  login: string;
 }
 
 export default TokenPayload;

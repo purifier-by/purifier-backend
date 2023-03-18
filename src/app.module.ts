@@ -14,7 +14,6 @@ import { BrandsModule } from './modules/brands/brands.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { SubCategoriesModule } from './modules/subCategories/subCategories.module';
 
-
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -58,4 +57,4 @@ import { SubCategoriesModule } from './modules/subCategories/subCategories.modul
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}

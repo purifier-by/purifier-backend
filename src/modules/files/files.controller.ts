@@ -10,7 +10,7 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesService } from './files.service';
 import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
-import JwtAuthenticationGuard from '../authentication/jwt-authentication.guard';
+import { JwtAuthGuard } from '../authentication/jwt-authentication.guard';
 import { ConfigService } from '@nestjs/config';
 
 export const storage = {
@@ -35,7 +35,7 @@ export class FilesController {
   ) {}
 
   @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('/upload')
   @UseInterceptors(FileInterceptor('file', storage))
   @ApiConsumes('multipart/form-data')

@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import FindOneParams from 'src/utils/findOneParams';
-import JwtAuthenticationGuard from '../authentication/jwt-authentication.guard';
+import { JwtAuthGuard } from '../authentication/jwt-authentication.guard';
 import BrandDto from './brand.dto';
 import { BrandsService } from './brands.service';
 
@@ -34,21 +34,21 @@ export default class BrandsController {
 
   @Put(':id')
   @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(JwtAuthGuard)
   updateBrand(@Param() { id }: FindOneParams, @Body() brandData: BrandDto) {
     return this.brandsService.updateBrand(id, brandData);
   }
 
   @Post()
   @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(JwtAuthGuard)
   createBrand(@Body() brandData: BrandDto) {
     return this.brandsService.createBrand(brandData);
   }
 
   @Delete(':id')
   @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(JwtAuthGuard)
   deleteBrand(@Param() { id }: FindOneParams) {
     return this.brandsService.deleteBrand(id);
   }

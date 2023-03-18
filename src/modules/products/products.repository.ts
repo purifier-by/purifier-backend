@@ -4,7 +4,6 @@ import { PoolClient } from 'pg';
 import DatabaseService from '../../database/database.service';
 import { ProductDto } from './dto/product.dto';
 import ProductWithDetails from './productWithDetails.model';
-import e from 'express';
 
 @Injectable()
 class ProductsRepository {
@@ -22,13 +21,12 @@ class ProductsRepository {
     sort: string,
     next: number | null = 1,
   ) {
-    const limit = 2;
+    const limit = 12;
     const page = (next - 1) * limit;
 
-    // const client = await this.databaseService.getPoolClient();
     const domain = this.configService.get('DOMAIN');
 
-    let whereSql = [];
+    const whereSql = [];
 
     if (priceMin & priceMax) {
       whereSql.push(`price BETWEEN ${priceMin} AND ${priceMax}`);
@@ -104,8 +102,6 @@ class ProductsRepository {
         SELECT *
         FROM selected_products, total_products_count_response;
         `;
-
-    // console.log(sqlQuery)
 
     const databaseResponse = await this.databaseService.runQuery(sqlQuery);
 
@@ -186,10 +182,22 @@ class ProductsRepository {
     try {
       await client.query('BEGIN;');
 
+      console.log(
+        productData.title,
+        productData.description,
+        productData.characteristics,
+        productData.points,
+        productData.price,
+        productData.brandId,
+        productData.categoryId,
+        productData.subCategoryId,
+        productData.shortDescription,
+      );
+
       // TODO: Do validation if brandId, categoryId, subCategoryId  does no exist
 
       const productResponse = await client.query(
-        `INSERT INTO products(title, description, characteristics, points, price, "brandId", "categoryId", "subCategoryId") VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING * `,
+        `INSERT INTO products(title, description, characteristics, points, price, "brandId", "categoryId", "subCategoryId", "short_description") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING * `,
         [
           productData.title,
           productData.description,
@@ -199,6 +207,7 @@ class ProductsRepository {
           productData.brandId,
           productData.categoryId,
           productData.subCategoryId,
+          productData.shortDescription,
         ],
       );
 
@@ -294,7 +303,8 @@ class ProductsRepository {
             price = $6,
             "brandId" = $7,
             "categoryId" = $8,
-            "subCategoryId" = $9
+            "subCategoryId" = $9,
+            "short_description" = $10
                 WHERE id = $1 RETURNING * `,
         [
           id,
@@ -306,6 +316,7 @@ class ProductsRepository {
           productData.brandId,
           productData.categoryId,
           productData.subCategoryId,
+          productData.shortDescription,
         ],
       );
       const productEntity = productResponse.rows[0];
@@ -315,7 +326,7 @@ class ProductsRepository {
 
       await this.updateImages(client, id, productData.images);
 
-      await client.query(`COMMIT; `);
+      await client.query(`COMMIT;`);
       return this.getWithDetails(productEntity.id);
     } catch (error) {
       await client.query('ROLLBACK;');

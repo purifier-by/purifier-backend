@@ -1,5 +1,4 @@
-import { Knex } from "knex";
-
+import { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
   await knex.raw(`
@@ -9,13 +8,16 @@ export async function up(knex: Knex): Promise<void> {
       image text,
       "categoryId" int 
     );
-    `)
+    `);
 
-  await knex.raw(`ALTER TABLE sub_categories ADD CONSTRAINT fk_sub_categories_category_id FOREIGN KEY ("categoryId") REFERENCES categories`)
+  await knex.raw(
+    `ALTER TABLE sub_categories ADD CONSTRAINT fk_sub_categories_category_id FOREIGN KEY ("categoryId") REFERENCES categories`,
+  );
 
-  await knex.raw(`ALTER TABLE products ADD COLUMN "subCategoryId" int REFERENCES sub_categories(id)`)
+  await knex.raw(
+    `ALTER TABLE products ADD COLUMN "subCategoryId" int REFERENCES sub_categories(id)`,
+  );
 }
-
 
 export async function down(knex: Knex): Promise<void> {
   await knex.raw(`
@@ -24,4 +26,3 @@ export async function down(knex: Knex): Promise<void> {
     `);
   await knex.raw(`DROP TABLE sub_categories`);
 }
-

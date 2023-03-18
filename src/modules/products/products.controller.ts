@@ -15,7 +15,7 @@ import {
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import FindOneParams from 'src/utils/findOneParams';
 import { OrderParams } from 'src/utils/orderParams';
-import JwtAuthenticationGuard from '../authentication/jwt-authentication.guard';
+import { JwtAuthGuard } from '../authentication/jwt-authentication.guard';
 import { GetProductsByCategoryQuery } from './dto/getProductsByCategoryQuery';
 import { GetProductsByPriceQuery } from './dto/getProductsByPriceQuery';
 import { ProductDto } from './dto/product.dto';
@@ -67,8 +67,8 @@ export default class ProductsController {
   }
 
   @Put(':id')
-  @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthenticationGuard)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   updateProduct(
     @Param() { id }: FindOneParams,
     @Body() productData: ProductDto,
@@ -77,15 +77,15 @@ export default class ProductsController {
   }
 
   @Post()
-  @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthenticationGuard)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   createProduct(@Body() productData: ProductDto) {
     return this.productsService.createProduct(productData);
   }
 
   @Delete(':id')
-  @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthenticationGuard)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   deleteProduct(@Param() { id }: FindOneParams) {
     return this.productsService.deleteProduct(id);
   }

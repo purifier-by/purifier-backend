@@ -12,7 +12,7 @@ import {
 import { Response } from 'express';
 import { AuthenticationService } from './authentication.service';
 import { LocalAuthenticationGuard } from './localAuthentication.guard';
-import JwtAuthenticationGuard from './jwt-authentication.guard';
+import { JwtAuthGuard } from './jwt-authentication.guard';
 import RequestWithUser from './requestWithUser.interface';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
@@ -37,7 +37,7 @@ export class AuthenticationController {
     return { token: jwt, ...user };
   }
 
-  // @UseGuards(JwtAuthenticationGuard)
+  // @UseGuards(JwtAuthGuard)
   // @Post('logout')
   // async logOut(@Res() response: Response) {
   //     response.setHeader(
@@ -47,7 +47,7 @@ export class AuthenticationController {
   //     return response.sendStatus(200);
   // }
 
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(JwtAuthGuard)
   @Get()
   authenticate(@Req() request: RequestWithUser) {
     return request.user;
