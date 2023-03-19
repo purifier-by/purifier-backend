@@ -19,7 +19,12 @@ class CategoriesRepository {
                     title,
                     CONCAT('${domain}/', image) AS "image",
                     (
-                        SELECT json_agg(row_to_json(sub_categories))
+                        SELECT json_agg(json_build_object(
+                          'id', "id",
+                          'title', "title",
+                          'categoryId', "categoryId",
+                          'image', CONCAT('${domain}/', sub_categories.image)
+                      ))
                         FROM sub_categories
                         WHERE sub_categories."categoryId" = categories.id
                     ) as "subCategories",
@@ -41,12 +46,15 @@ class CategoriesRepository {
     const domain = this.configService.get('DOMAIN');
 
     const categoryResponse = await this.databaseService.runQuery(
-      `
-          SELECT
-          id, 
+      `SELECT id, 
           title,
           CONCAT('${domain}/', image) as "image",
-          (SELECT json_agg(row_to_json(sub_categories))
+          (SELECT json_agg(json_build_object(
+            'id', "id",
+            'title', "title",
+            'categoryId', "categoryId",
+            'image', CONCAT('${domain}/', sub_categories.image)
+        ))
                 FROM sub_categories
                 WHERE  sub_categories."categoryId" = categories.id) as "subCategories"
           FROM categories
