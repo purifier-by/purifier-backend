@@ -5,6 +5,7 @@ export interface CategoryWithDetailsData {
   id: number;
   title: string;
   image: string;
+  slug: string;
   subCategories: SubCategoryModel[];
   totalProductsCount: string;
 }

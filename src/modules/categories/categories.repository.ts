@@ -22,6 +22,7 @@ class CategoriesRepository {
                         SELECT json_agg(json_build_object(
                           'id', "id",
                           'title', "title",
+                          'slug', "slug",
                           'categoryId', "categoryId",
                           'image', CONCAT('${domain}/', sub_categories.image)
                       ))
@@ -52,6 +53,7 @@ class CategoriesRepository {
           (SELECT json_agg(json_build_object(
             'id', "id",
             'title', "title",
+            'slug', "slug",
             'categoryId', "categoryId",
             'image', CONCAT('${domain}/', sub_categories.image)
         ))
@@ -79,13 +81,14 @@ class CategoriesRepository {
         `
               INSERT INTO categories (
                 title,
+                slug,
                 image
               ) VALUES (
                 $1,
                 $2
               ) RETURNING *
             `,
-        [categoryData.title, categoryData.image],
+        [categoryData.title, categoryData.slug, categoryData.image],
       );
 
       const categoryEntity = categoryResponse.rows[0];
@@ -113,7 +116,7 @@ class CategoriesRepository {
             WHERE id = $1
             RETURNING *
         `,
-        [id, categoryData.title, categoryData.image],
+        [id, categoryData.title, categoryData.slug, categoryData.image],
       );
       const categoryEntity = categoryResponse.rows[0];
       if (!categoryEntity) {
