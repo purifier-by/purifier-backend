@@ -192,6 +192,7 @@ class ProductsRepository {
         productData.categoryId,
         productData.subCategoryId,
         productData.shortDescription,
+        productData.slug,
       );
 
       // TODO: Do validation if brandId, categoryId, subCategoryId  does no exist
@@ -304,7 +305,8 @@ class ProductsRepository {
             "brandId" = $7,
             "categoryId" = $8,
             "subCategoryId" = $9,
-            "short_description" = $10
+            "short_description" = $10,
+             slug = $11,
                 WHERE id = $1 RETURNING * `,
         [
           id,

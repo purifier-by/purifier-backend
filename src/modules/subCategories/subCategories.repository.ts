@@ -56,11 +56,13 @@ export class SubCategoriesRepository {
               INSERT INTO sub_categories (
                 title,
                 image,
+                slug,
                 "categoryId"
               ) VALUES (
                 $1,
                 $2,
-                $3
+                $3,
+                $4
               ) RETURNING *
             `,
         [categoryData.title, categoryData.image, categoryData.categoryId],
@@ -87,7 +89,7 @@ export class SubCategoriesRepository {
       const categoryResponse = await client.query(
         `
             UPDATE sub_categories
-            SET title = $2, image = $3, "categoryId" = $4
+            SET title = $2, image = $3, slug = $4, "categoryId" = $5
             WHERE id = $1
             RETURNING *
         `,
