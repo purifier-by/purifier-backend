@@ -85,7 +85,8 @@ class CategoriesRepository {
                 image
               ) VALUES (
                 $1,
-                $2
+                $2,
+                $3
               ) RETURNING *
             `,
         [categoryData.title, categoryData.slug, categoryData.image],
