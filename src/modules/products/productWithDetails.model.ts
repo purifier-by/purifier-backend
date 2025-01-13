@@ -14,6 +14,7 @@ export interface ProductWithDetailsData {
   brandId: number | null;
   categoryId: number | null;
   subCategoryId: number | null;
+  slug: string;
 
   images: string[];
   brand: BrandModel | null;

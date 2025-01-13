@@ -14,4 +14,8 @@ export class SubCategoryDto {
     @IsNumber()
     @IsNotEmpty()
     categoryId: number;
+
+    @IsString()
+    @IsNotEmpty()
+    slug: string;
 }

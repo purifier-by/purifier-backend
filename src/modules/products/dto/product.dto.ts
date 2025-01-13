@@ -39,6 +39,10 @@ export class ProductDto {
   @IsNotEmpty()
   subCategoryId: number;
 
+  @IsString()
+  @IsNotEmpty()
+  slug: string;
+
   // @IsString({ each: true })
   // @Type(() => String)
   @IsOptional()
