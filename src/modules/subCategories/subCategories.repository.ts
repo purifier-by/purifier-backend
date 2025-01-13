@@ -65,7 +65,12 @@ export class SubCategoriesRepository {
                 $4
               ) RETURNING *
             `,
-        [categoryData.title, categoryData.image, categoryData.categoryId],
+        [
+          categoryData.title,
+          categoryData.slug,
+          categoryData.image,
+          categoryData.categoryId,
+        ],
       );
 
       const categoryEntity = categoryResponse.rows[0];
