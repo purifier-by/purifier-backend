@@ -17,7 +17,7 @@ import ServicesDto from './services.dto';
 import { ServicesService } from './services.service';
 
 @ApiTags('Services')
-@Controller('Services')
+@Controller('services')
 @UseInterceptors(ClassSerializerInterceptor)
 export default class ServicesController {
   constructor(private readonly ServicesService: ServicesService) {}
