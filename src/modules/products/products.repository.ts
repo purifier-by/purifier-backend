@@ -193,6 +193,8 @@ class ProductsRepository {
         productData.subCategoryId,
         productData.shortDescription,
         productData.slug,
+        productData.delivery,
+        productData.payment,
       );
 
       // TODO: Do validation if brandId, categoryId, subCategoryId  does no exist
@@ -307,6 +309,9 @@ class ProductsRepository {
             "subCategoryId" = $9,
             "short_description" = $10,
              slug = $11,
+             delivery = $12,
+             payment = $13,
+
                 WHERE id = $1 RETURNING * `,
         [
           id,
@@ -319,6 +324,9 @@ class ProductsRepository {
           productData.categoryId,
           productData.subCategoryId,
           productData.shortDescription,
+          productData.slug,
+          productData.delivery,
+          productData.payment,
         ],
       );
       const productEntity = productResponse.rows[0];

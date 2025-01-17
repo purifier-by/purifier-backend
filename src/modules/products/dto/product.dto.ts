@@ -43,6 +43,14 @@ export class ProductDto {
   @IsNotEmpty()
   slug: string;
 
+  @IsString()
+  @IsOptional()
+  delivery = 'Доставка в течение 3-5 рабочих дней';
+
+  @IsString()
+  @IsOptional()
+  payment = 'Оплата при получении или онлайн';
+
   // @IsString({ each: true })
   // @Type(() => String)
   @IsOptional()

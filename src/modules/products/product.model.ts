@@ -12,6 +12,8 @@ export interface ProductModelData {
   subCategoryId: number | null;
   short_description: string | null;
   slug: string;
+  payment: string;
+  delivery: string;
 }
 
 export class ProductModel {
@@ -23,6 +25,8 @@ export class ProductModel {
   price: number;
   slug: string;
   shortDescription: string | null;
+  payment: string;
+  delivery: string;
 
   @Exclude()
   brandId: number | null;
@@ -44,6 +48,8 @@ export class ProductModel {
     this.categoryId = productData.categoryId;
     this.subCategoryId = productData.subCategoryId;
     this.slug = productData.slug;
+    this.payment = productData.payment;
+    this.delivery = productData.delivery;
     this.shortDescription = productData['short_description'];
   }
 }
