@@ -28,16 +28,16 @@ export class SubCategoriesRepository {
 
     const categoryResponse = await this.databaseService.runQuery(
       `
-          SELECT
-          id,
-          description, 
-          slug,
-          title,
-          CONCAT('${domain}/', image) as "image",
-          "categoryId"
-          FROM sub_categories
-          WHERE sub_categories.id=$1
-          `,
+        SELECT
+        id,
+        description, 
+        slug,
+        title,
+        CONCAT('${domain}/', image) as "image",
+        "categoryId"
+        FROM sub_categories
+        WHERE sub_categories.slug = $1
+        `,
       [slug],
     );
     const categoryEntity = categoryResponse.rows[0];

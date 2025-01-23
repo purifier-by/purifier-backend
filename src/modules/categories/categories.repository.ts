@@ -61,7 +61,7 @@ class CategoriesRepository {
                 FROM sub_categories
                 WHERE  sub_categories."categoryId" = categories.id) as "subCategories"
           FROM categories
-          WHERE categories.id=$1
+          WHERE categories.slug=$1
           `,
       [slug],
     );

@@ -160,7 +160,7 @@ class ProductsRepository {
                     )
                 ) AS images 
                 FROM products
-            WHERE products.id = $1`,
+            WHERE products.slug = $1`,
         [productSlug],
       );
       const productEntity = productResponse.rows[0];
