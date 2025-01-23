@@ -23,13 +23,41 @@ export class SubCategoriesRepository {
     );
   }
 
+  async getBySlug(slug: string) {
+    const domain = this.configService.get('DOMAIN');
+
+    const categoryResponse = await this.databaseService.runQuery(
+      `
+          SELECT
+          id,
+          description, 
+          slug,
+          title,
+          CONCAT('${domain}/', image) as "image",
+          "categoryId"
+          FROM sub_categories
+          WHERE sub_categories.id=$1
+          `,
+      [slug],
+    );
+    const categoryEntity = categoryResponse.rows[0];
+
+    if (!categoryEntity) {
+      throw new NotFoundException();
+    }
+
+    return new SubCategoryModel({ ...categoryEntity });
+  }
+
   async getById(id: number) {
     const domain = this.configService.get('DOMAIN');
 
     const categoryResponse = await this.databaseService.runQuery(
       `
           SELECT
-          id, 
+          id,
+          slug,
+          description, 
           title,
           CONCAT('${domain}/', image) as "image",
           "categoryId"
@@ -56,18 +84,21 @@ export class SubCategoriesRepository {
               INSERT INTO sub_categories (
                 title,
                 image,
+                description, 
                 slug,
                 "categoryId"
               ) VALUES (
                 $1,
                 $2,
                 $3,
-                $4
+                $4,
+                $5
               ) RETURNING *
             `,
         [
           categoryData.title,
           categoryData.slug,
+          categoryData.description,
           categoryData.image,
           categoryData.categoryId,
         ],
@@ -93,13 +124,21 @@ export class SubCategoriesRepository {
 
       const categoryResponse = await client.query(
         `
-            UPDATE sub_categories
-            SET title = $2, image = $3, slug = $4, "categoryId" = $5
-            WHERE id = $1
-            RETURNING *
-        `,
-        [id, categoryData.title, categoryData.image, categoryData.categoryId],
+          UPDATE sub_categories
+          SET title = $2, image = $3, slug = $4, "categoryId" = $5, description = $6
+          WHERE id = $1
+          RETURNING *
+      `,
+        [
+          id,
+          categoryData.title,
+          categoryData.image,
+          categoryData.slug,
+          categoryData.categoryId,
+          categoryData.description,
+        ],
       );
+
       const categoryEntity = categoryResponse.rows[0];
       if (!categoryEntity) {
         throw new NotFoundException();
@@ -114,7 +153,6 @@ export class SubCategoriesRepository {
       client.release();
     }
   }
-
   async delete(id: number) {
     const client = await this.databaseService.getPoolClient();
 

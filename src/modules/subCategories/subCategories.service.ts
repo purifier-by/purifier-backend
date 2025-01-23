@@ -16,6 +16,10 @@ export class SubCategoriesService {
     return this.subCategoriesRepository.getById(id);
   }
 
+  getCategoryBySlug(slug: string) {
+    return this.subCategoriesRepository.getBySlug(slug);
+  }
+
   createCategory(categoryData: SubCategoryDto) {
     return this.subCategoriesRepository.create(categoryData);
   }

@@ -31,6 +31,10 @@ export class ProductsService {
     return this.productsRepository.getWithDetails(id);
   }
 
+  getProductBySlug(slug: string) {
+    return this.productsRepository.getWithDetailsSlug(slug);
+  }
+
   createProduct(productData: ProductDto) {
     return this.productsRepository.create(productData);
   }

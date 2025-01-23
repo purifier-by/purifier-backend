@@ -14,6 +14,10 @@ export class CategoriesService {
     return this.categoriesRepository.getById(id);
   }
 
+  getCategoryBySlug(slug: string) {
+    return this.categoriesRepository.getBySlug(slug);
+  }
+
   createCategory(categoryData: CategoryDto) {
     return this.categoriesRepository.create(categoryData);
   }

@@ -43,12 +43,44 @@ class CategoriesRepository {
     );
   }
 
+  async getBySlug(slug: string) {
+    const domain = this.configService.get('DOMAIN');
+
+    const categoryResponse = await this.databaseService.runQuery(
+      `SELECT id, 
+          title,
+          slug,
+          CONCAT('${domain}/', image) as "image",
+          (SELECT json_agg(json_build_object(
+            'id', "id",
+            'title', "title",
+            'slug', "slug",
+            'categoryId', "categoryId",
+            'image', CONCAT('${domain}/', sub_categories.image)
+        ))
+                FROM sub_categories
+                WHERE  sub_categories."categoryId" = categories.id) as "subCategories"
+          FROM categories
+          WHERE categories.id=$1
+          `,
+      [slug],
+    );
+    const categoryEntity = categoryResponse.rows[0];
+
+    if (!categoryEntity) {
+      throw new NotFoundException();
+    }
+
+    return new CategoryWithDetails({ ...categoryEntity });
+  }
+
   async getById(id: number) {
     const domain = this.configService.get('DOMAIN');
 
     const categoryResponse = await this.databaseService.runQuery(
       `SELECT id, 
           title,
+          slug,
           CONCAT('${domain}/', image) as "image",
           (SELECT json_agg(json_build_object(
             'id', "id",

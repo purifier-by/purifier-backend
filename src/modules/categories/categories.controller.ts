@@ -32,6 +32,11 @@ export default class CategoriesController {
     return this.categoriesService.getCategoryById(id);
   }
 
+  @Get(':slug')
+  getCategoryBySlug(@Param() { slug }: FindOneParams) {
+    return this.categoriesService.getCategoryBySlug(slug);
+  }
+
   @Put(':id')
   @ApiBearerAuth()
   updateCategory(

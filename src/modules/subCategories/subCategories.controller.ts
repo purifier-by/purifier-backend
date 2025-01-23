@@ -32,6 +32,11 @@ export class SubCategoriesController {
     return this.subCategoriesService.getCategoryById(id);
   }
 
+  @Get(':slug')
+  getSubCategoryBySlug(@Param() { slug }: FindOneParams) {
+    return this.subCategoriesService.getCategoryBySlug(slug);
+  }
+
   @Put(':id')
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)

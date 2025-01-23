@@ -3,19 +3,22 @@ import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
 import { substringDomain } from 'src/utils/substringDomain';
 
 export class SubCategoryDto {
-    @IsString()
-    @IsNotEmpty()
-    title: string;
+  @IsString()
+  @IsNotEmpty()
+  title: string;
 
-    @IsString()
-    @Transform(({ value }) => substringDomain(value))
-    image: string;
+  @IsString()
+  @Transform(({ value }) => substringDomain(value))
+  image: string;
 
-    @IsNumber()
-    @IsNotEmpty()
-    categoryId: number;
+  @IsNumber()
+  @IsNotEmpty()
+  categoryId: number;
 
-    @IsString()
-    @IsNotEmpty()
-    slug: string;
+  @IsString()
+  description: string;
+
+  @IsString()
+  @IsNotEmpty()
+  slug: string;
 }

@@ -119,6 +119,64 @@ class ProductsRepository {
     };
   }
 
+  async getWithDetailsSlug(productSlug: string) {
+    const client = await this.databaseService.getPoolClient();
+    const domain = this.configService.get('DOMAIN');
+
+    try {
+      const productResponse = await client.query(
+        `SELECT *
+            , (
+                SELECT json_build_object('id', brand.id, 'title', brand.title)
+                FROM(
+                    SELECT *
+                    FROM brands
+                    WHERE brands.id = products."brandId"
+                ) brand
+        ) AS "brand"
+            , (
+                SELECT json_build_object('id', category.id, 'title', category.title, 'image', CONCAT('${domain}/', category.image))
+        FROM(
+            SELECT *
+            FROM categories
+                    WHERE categories.id = products."categoryId"
+        ) category
+                ) AS "category"
+            , (
+                SELECT json_build_object('id', "subCategory".id, 'title', "subCategory".title, 'image', CONCAT('${domain}/', "subCategory".image))
+        FROM(
+            SELECT *
+            FROM sub_categories
+                    WHERE sub_categories.id = products."subCategoryId"
+        ) "subCategory"
+                ) AS "subCategory"
+            , (
+                SELECT ARRAY
+                    (
+                        SELECT CONCAT('${domain}/', url) AS "url"
+                    FROM product_images
+                    WHERE product_images."productId" = products.id
+                    ORDER BY position
+                    )
+                ) AS images 
+                FROM products
+            WHERE products.id = $1`,
+        [productSlug],
+      );
+      const productEntity = productResponse.rows[0];
+
+      if (!productEntity) {
+        throw new NotFoundException();
+      }
+
+      return new ProductWithDetails({ ...productEntity });
+    } catch (error) {
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   async getWithDetails(productId: number) {
     const client = await this.databaseService.getPoolClient();
     const domain = this.configService.get('DOMAIN');

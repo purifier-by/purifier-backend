@@ -66,6 +66,11 @@ export default class ProductsController {
     return this.productsService.getProductById(id);
   }
 
+  @Get(':slug')
+  getProductBySlug(@Param() { slug }: FindOneParams) {
+    return this.productsService.getProductBySlug(slug);
+  }
+
   @Put(':id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
