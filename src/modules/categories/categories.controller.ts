@@ -27,7 +27,7 @@ export default class CategoriesController {
     return this.categoriesService.getCategories();
   }
 
-  @Get(':id')
+  @Get('id/:id')
   getCategoryById(@Param() { id }: FindOneParams) {
     return this.categoriesService.getCategoryById(id);
   }
