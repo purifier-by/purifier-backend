@@ -27,13 +27,13 @@ export default class CategoriesController {
     return this.categoriesService.getCategories();
   }
 
-  @Get('id/:id')
-  getCategoryById(@Param() { id }: FindOneParams) {
+  @Get(':id')
+  getCategoryById(@Param('id') id: number) {
     return this.categoriesService.getCategoryById(id);
   }
 
   @Get(':slug')
-  getCategoryBySlug(@Param() { slug }: FindOneParams) {
+  getCategoryBySlug(@Param('slug') slug: string) {
     return this.categoriesService.getCategoryBySlug(slug);
   }
 
