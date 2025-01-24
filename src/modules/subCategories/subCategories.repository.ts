@@ -15,7 +15,8 @@ export class SubCategoriesRepository {
     const domain = this.configService.get('DOMAIN');
 
     const databaseResponse = await this.databaseService.runQuery(`
-            SELECT id, title, CONCAT('${domain}/', image) AS "image", "categoryId" FROM sub_categories
+            SELECT id, title, 
+                   description,  CONCAT('${domain}/', image) AS "image", "categoryId" FROM sub_categories
         `);
 
     return databaseResponse.rows.map(
