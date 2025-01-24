@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 import { substringDomain } from 'src/utils/substringDomain';
 
 export class SubCategoryDto {
@@ -16,7 +16,8 @@ export class SubCategoryDto {
   categoryId: number;
 
   @IsString()
-  description: string;
+  @IsOptional()
+  description?: string;
 
   @IsString()
   @IsNotEmpty()

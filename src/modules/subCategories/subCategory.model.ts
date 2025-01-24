@@ -1,7 +1,7 @@
 export interface SubCategoryModelData {
   id: number;
   title: string;
-  description: string;
+  description?: string;
   image: string;
   slug: string;
   categoryId: number | null;
@@ -10,7 +10,7 @@ export interface SubCategoryModelData {
 export class SubCategoryModel {
   id: number;
   title: string;
-  description: string;
+  description?: string;
   image: string;
   slug: string;
   categoryId: number | null;
