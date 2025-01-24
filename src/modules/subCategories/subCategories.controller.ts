@@ -41,7 +41,7 @@ export class SubCategoriesController {
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)
   updateSubCategory(
-    @Param() { id }: FindOneParams,
+    @Param('id') id: number,
     @Body() categoryData: SubCategoryDto,
   ) {
     return this.subCategoriesService.updateCategory(id, categoryData);
@@ -57,7 +57,7 @@ export class SubCategoriesController {
   @Delete(':id')
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)
-  deleteSubCategory(@Param() { id }: FindOneParams) {
+  deleteSubCategory(@Param('id') id: number) {
     return this.subCategoriesService.deleteCategory(id);
   }
 }
