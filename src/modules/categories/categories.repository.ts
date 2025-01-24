@@ -22,6 +22,7 @@ class CategoriesRepository {
                         SELECT json_agg(json_build_object(
                           'id', "id",
                           'title', "title",
+                           'description', "description",
                           'slug', "slug",
                           'categoryId', "categoryId",
                           'image', CONCAT('${domain}/', sub_categories.image)
@@ -55,6 +56,7 @@ class CategoriesRepository {
             'id', "id",
             'title', "title",
             'slug', "slug",
+            'description', "description",
             'categoryId', "categoryId",
             'image', CONCAT('${domain}/', sub_categories.image)
         ))
@@ -85,6 +87,7 @@ class CategoriesRepository {
           (SELECT json_agg(json_build_object(
             'id', "id",
             'title', "title",
+            'description', "description",
             'slug', "slug",
             'categoryId', "categoryId",
             'image', CONCAT('${domain}/', sub_categories.image)
