@@ -28,14 +28,14 @@ export default class BrandsController {
   }
 
   @Get(':id')
-  getBrandById(@Param() { id }: FindOneParams) {
+  getBrandById(@Param('id') id: number) {
     return this.brandsService.getBrandById(id);
   }
 
   @Put(':id')
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)
-  updateBrand(@Param() { id }: FindOneParams, @Body() brandData: BrandDto) {
+  updateBrand(@Param('id') id: number, @Body() brandData: BrandDto) {
     return this.brandsService.updateBrand(id, brandData);
   }
 
@@ -49,7 +49,7 @@ export default class BrandsController {
   @Delete(':id')
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)
-  deleteBrand(@Param() { id }: FindOneParams) {
+  deleteBrand(@Param('id') id: number) {
     return this.brandsService.deleteBrand(id);
   }
 }

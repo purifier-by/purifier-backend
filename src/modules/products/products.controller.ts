@@ -74,10 +74,7 @@ export default class ProductsController {
   @Put(':id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  updateProduct(
-    @Param() { id }: FindOneParams,
-    @Body() productData: ProductDto,
-  ) {
+  updateProduct(@Param('id') id: number, @Body() productData: ProductDto) {
     return this.productsService.updateProduct(id, productData);
   }
 
@@ -91,7 +88,7 @@ export default class ProductsController {
   @Delete(':id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  deleteProduct(@Param() { id }: FindOneParams) {
+  deleteSubCategory(@Param('id') id: number) {
     return this.productsService.deleteProduct(id);
   }
 }

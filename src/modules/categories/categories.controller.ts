@@ -39,10 +39,7 @@ export default class CategoriesController {
 
   @Put(':id')
   @ApiBearerAuth()
-  updateCategory(
-    @Param() { id }: FindOneParams,
-    @Body() categoryData: CategoryDto,
-  ) {
+  updateCategory(@Param('id') id: number, @Body() categoryData: CategoryDto) {
     return this.categoriesService.updateCategory(id, categoryData);
   }
 
@@ -55,7 +52,7 @@ export default class CategoriesController {
 
   @Delete(':id')
   @ApiBearerAuth()
-  deleteCategory(@Param() { id }: FindOneParams) {
+  deleteSubCategory(@Param('id') id: number) {
     return this.categoriesService.deleteCategory(id);
   }
 }

@@ -34,10 +34,7 @@ export default class ServicesController {
 
   @Put(':id')
   @ApiBearerAuth()
-  updateServices(
-    @Param() { id }: FindOneParams,
-    @Body() servicesData: ServicesDto,
-  ) {
+  updateServices(@Param('id') id: number, @Body() servicesData: ServicesDto) {
     return this.ServicesService.updateServices(id, servicesData);
   }
 
@@ -50,7 +47,7 @@ export default class ServicesController {
 
   @Delete(':id')
   @ApiBearerAuth()
-  deleteCServices(@Param() { id }: FindOneParams) {
+  deleteCServices(@Param('id') id: number) {
     return this.ServicesService.deleteServices(id);
   }
 }
