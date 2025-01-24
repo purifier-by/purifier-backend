@@ -28,7 +28,7 @@ export default class ServicesController {
   }
 
   @Get(':id')
-  getServicesById(@Param() { id }: FindOneParams) {
+  getServicesById(@Param('id') id: number) {
     return this.ServicesService.getServicesById(id);
   }
 
