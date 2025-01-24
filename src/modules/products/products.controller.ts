@@ -61,12 +61,12 @@ export default class ProductsController {
     );
   }
 
-  @Get(':id')
+  @Get('id/:id')
   getProductById(@Param('id') id: number) {
     return this.productsService.getProductById(id);
   }
 
-  @Get(':slug')
+  @Get('slug/:slug')
   getProductBySlug(@Param('slug') slug: string) {
     return this.productsService.getProductBySlug(slug);
   }
