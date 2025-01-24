@@ -33,8 +33,8 @@ class CategoriesRepository {
                         SELECT COUNT(*)
                         FROM products
                         WHERE products."categoryId" = categories.id
-                    ) AS "totalProductsCount"
-            FROM categories
+                    ) AS "totalProductsCount",    slug
+                                FROM categories
         `,
     );
 

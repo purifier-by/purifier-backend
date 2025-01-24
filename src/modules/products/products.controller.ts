@@ -62,12 +62,12 @@ export default class ProductsController {
   }
 
   @Get(':id')
-  getProductById(@Param() { id }: FindOneParams) {
+  getProductById(@Param('id') id: number) {
     return this.productsService.getProductById(id);
   }
 
   @Get(':slug')
-  getProductBySlug(@Param() { slug }: FindOneParams) {
+  getProductBySlug(@Param('slug') slug: string) {
     return this.productsService.getProductBySlug(slug);
   }
 

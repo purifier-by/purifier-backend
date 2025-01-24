@@ -28,12 +28,12 @@ export class SubCategoriesController {
   }
 
   @Get(':id')
-  getSubCategoryById(@Param() { id }: FindOneParams) {
+  getSubCategoryById(@Param('id') id: number) {
     return this.subCategoriesService.getCategoryById(id);
   }
 
   @Get(':slug')
-  getSubCategoryBySlug(@Param() { slug }: FindOneParams) {
+  getSubCategoryBySlug(@Param('slug') slug: string) {
     return this.subCategoriesService.getCategoryBySlug(slug);
   }
 
