@@ -8,7 +8,7 @@ export class ProductsService {
 
   getProducts(
     categoryId?: number,
-    subCategoryIds?: number[],
+    subCategorySlugs?: string[],
     priceMin?: number,
     priceMax?: number,
     sort?: string,
@@ -18,7 +18,7 @@ export class ProductsService {
   ) {
     return this.productsRepository.get(
       categoryId,
-      subCategoryIds,
+      subCategorySlugs,
       priceMin,
       priceMax,
       sort,

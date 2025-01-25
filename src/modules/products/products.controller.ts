@@ -22,6 +22,7 @@ import { ProductDto } from './dto/product.dto';
 import { ProductsService } from './products.service';
 import { SearchProductsQuery } from './dto/searchProductsQuery';
 import { LoadMorePagination } from './dto/loadMorePaginationQuery';
+import { string } from 'joi';
 
 @ApiTags('Products')
 @Controller('products')
@@ -31,19 +32,23 @@ export default class ProductsController {
 
   @Get()
   @ApiQuery({
-    name: 'subCategoryIds',
+    name: 'subCategorySlugs',
     required: false,
     type: 'string',
-    example: '1,2,3',
+    example: 'slug1,slug2,slug3',
     explode: false,
   })
   getProducts(
     @Query() { categoryId }: GetProductsByCategoryQuery,
     @Query(
-      'subCategoryIds',
-      new ParseArrayPipe({ items: Number, separator: ',', optional: true }),
+      'subCategorySlugs',
+      new ParseArrayPipe({
+        items: String,
+        separator: ',',
+        optional: true,
+      }),
     )
-    subCategoryIds: number[],
+    subCategorySlugs: string[],
     @Query() { priceMin, priceMax }: GetProductsByPriceQuery,
     @Query() { search }: SearchProductsQuery,
     @Query() { next }: LoadMorePagination,
@@ -51,7 +56,7 @@ export default class ProductsController {
   ) {
     return this.productsService.getProducts(
       categoryId,
-      subCategoryIds,
+      subCategorySlugs,
       priceMin,
       priceMax,
       orderBy,
@@ -60,7 +65,6 @@ export default class ProductsController {
       search,
     );
   }
-
   @Get('id/:id')
   getProductById(@Param('id') id: number) {
     return this.productsService.getProductById(id);

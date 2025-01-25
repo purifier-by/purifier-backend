@@ -14,7 +14,7 @@ class ProductsRepository {
 
   async get(
     categoryId: number,
-    subCategoryIds: number[],
+    subCategoryIds: string[],
     priceMin: number | null,
     priceMax: number | null,
     orderBy: string,
@@ -40,8 +40,15 @@ class ProductsRepository {
       whereSql.push(`"categoryId" = ${categoryId}`);
     }
 
-    if (subCategoryIds) {
-      whereSql.push(`"subCategoryId" IN (${subCategoryIds.join(',')})`);
+    if (subCategoryIds?.length) {
+      const slugList = subCategoryIds.map((slug) => `'${slug}'`).join(',');
+      whereSql.push(`
+    "subCategoryId" IN (
+      SELECT id
+      FROM sub_categories
+      WHERE slug IN (${slugList})
+    )
+  `);
     }
 
     let whereSqlQuery = ``;
